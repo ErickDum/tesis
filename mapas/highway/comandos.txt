@@ -1,0 +1,10 @@
+netconvert -v --ramps.guess --remove-edges.isolated --edges.join --geometry.remove --osm-files map.osm -o map.net.xml
+
+polyconvert -v --net-file map.net.xml --osm-files map.osm -o mapa.poly.xml
+
+python3 /opt/sumo/tools/randomTrips.py -v -b 0 -e 500 -p 1 -n map.net.xml -r map.rou.xml 
+
+sumo -c osm.sumocfg --fcd-output trace.xml
+
+python3 /opt/sumo/tools/traceExporter.py -i trace.xml --ns2mobility-output=mobility.tcl
+
