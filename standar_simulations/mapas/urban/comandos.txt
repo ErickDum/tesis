@@ -1,0 +1,12 @@
+python rotar.py -i map_urban.osm -o map_urban_r.osm -a 12
+
+netconvert -v --ramps.guess --remove-edges.isolated --edges.join --geometry.remove --osm-files map_urban_r.osm -o map_urban.net.xml
+
+polyconvert -v --net-file map_urban.net.xml --osm-files map_urban_r.osm -o map_urban.poly.xml
+
+python3 /opt/sumo/tools/randomTrips.py -v -b 0 -e 500 -p 1 -n map_urban.net.xml -r map_urban.rou.xml 
+
+sumo -c osm.sumocfg --fcd-output trace_urban.xml
+
+python3 /opt/sumo/tools/traceExporter.py -i trace_urban.xml --ns2mobility-output=mobility.tcl
+

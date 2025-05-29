@@ -1,0 +1,360 @@
+Interferentes: 20 - Simulación: 0
+calling /usr/local/share/sumo/bin/duarouter --alternatives-output NUL -n ./mapas/urban/map_urban.net.xml -r trips.trips.xml --ignore-errors --begin 0.0 --end 500.0 --no-warnings --no-step-log -v -o ./mapas/urban/map_urban.rou.xml
+Loading net ... done.
+Skipped until: 0.00
+DijkstraRouter answered 474 queries and explored 13.20 edges on average.
+DijkstraRouter spent 0.00s answering queries (0.00ms on average).
+Success.
+Generando rutas aleatorias...
+Ruta seleccionada: 8 nodos distintos
+Rutas generadas y guardadas en /home/tesis/Documentos/rl_training/ns-3-dev/mapas/urban/platooning_urban.rou.xml
+Loading net-file from './mapas/urban/map_urban.net.xml' ... done (16ms).
+Loading additional-files from './mapas/urban/map_urban.poly.xml' ... done (27ms).
+Loading route-files incrementally from './mapas/urban/platooning_urban.rou.xml'
+Loading done.
+Simulation version v1_23_1+0328-c58cdcecd81 started with time: 0.00.
+Simulation ended at time: 3600.00.
+Reason: The final simulation step has been reached.
+Performance:
+ Duration: 0.42s
+ Real time factor: 8612.44
+ UPS: 25980.861244
+Vehicles:
+ Inserted: 25
+ Running: 0
+ Waiting: 0
+Ejecutando simulación con 20 interferentes...
+Duración de la simulacion: 100.01
+Data rate 1000000bps
+App inicia en 40.014 sec
+App se detiene en 100.01 sec
+Instaladas aplicaciones en nodos receptores
+Tx address: 7.0.0.2
+Rx address: 7.0.0.3
+Rx address: 7.0.0.4
+Rx address: 7.0.0.5
+Rx address: 7.0.0.3
+Rx address: 7.0.0.4
+Rx address: 7.0.0.5
+Rx address: 7.0.0.3
+Rx address: 7.0.0.4
+Rx address: 7.0.0.5
+Rx address: 7.0.0.3
+Rx address: 7.0.0.4
+Rx address: 7.0.0.5
+Starting simulation...
+Observation: 1 1 1 1 
+Action received: 4
+Observation: 1 1 1 1 
+Action received: 2
+Observation: 1 1 1 1 
+Action received: 0
+Observation: 1 1 1 1 
+Action received: 4
+Observation: 1 1 1 1 
+Action received: 0
+Observation: 1 1 1 1 
+Action received: 4
+Observation: 1 1 1 1 
+Action received: 1
+Observation: 1 1 1 1 
+Action received: 4
+Observation: 1 1 1 1 
+Action received: 3
+Observation: 1 1 1 1 
+Action received: 1
+Observation: 1 1 1 1 
+Action received: 0
+Observation: 1 1 1 1 
+Action received: 4
+Observation: 1 1 1 1 
+Action received: 4
+Observation: 1 1 1 1 
+Action received: 2
+Observation: 1 1 1 1 
+Action received: 4
+Observation: 1 1 1 1 
+Action received: 4
+Observation: 1 1 1 1 
+Action received: 0
+Observation: 1 1 1 1 
+Action received: 2
+Observation: 1 1 1 1 
+Action received: 3
+Observation: 1 1 1 1 
+Action received: 0
+Observation: 1 1 1 1 
+Action received: 2
+Observation: 1 1 1 1 
+Action received: 0
+Observation: 1 1 1 1 
+Action received: 4
+Observation: 1 1 1 1 
+Action received: 1
+Observation: 1 1 1 1 
+Action received: 4
+Observation: 1 1 1 1 
+Action received: 1
+Observation: 1 1 1 1 
+Action received: 1
+Observation: 1 1 1 1 
+Action received: 2
+Observation: 1 1 1 1 
+Action received: 0
+Observation: 1 1 1 1 
+Action received: 2
+Observation: 1 1 1 1 
+Action received: 1
+Observation: 1 1 1 1 
+Action received: 3
+Observation: 1 1 1 1 
+Action received: 3
+Observation: 1 1 1 1 
+Action received: 1
+Observation: 1 1 1 1 
+Action received: 1
+Observation: 1 1 1 1 
+Action received: 0
+Observation: 1 1 1 1 
+Action received: 1
+Observation: 1 1 1 1 
+Action received: 0
+Observation: 1 1 1 1 
+Action received: 3
+Observation: 1 1 1 1 
+Action received: 1
+Observation: 1 1 1 1 
+Action received: 2
+Observation: 1 1 1 1 
+Action received: 4
+Observation: 1 1 1 1 
+Action received: 4
+Observation: 1 1 1 1 
+Action received: 4
+Observation: 1 1 1 1 
+Action received: 3
+Observation: 1 1 1 1 
+Action received: 3
+Observation: 1 1 1 1 
+Action received: 3
+Observation: 1 1 1 1 
+Action received: 0
+Observation: 1 1 1 1 
+Action received: 2
+Observation: 1 1 1 1 
+Interferentes: 20 - Simulación: 1
+calling /usr/local/share/sumo/bin/duarouter --alternatives-output NUL -n ./mapas/urban/map_urban.net.xml -r trips.trips.xml --ignore-errors --begin 0.0 --end 500.0 --no-warnings --no-step-log -v -o ./mapas/urban/map_urban.rou.xml
+Loading net ... done.
+Skipped until: 0.00
+DijkstraRouter answered 474 queries and explored 13.20 edges on average.
+DijkstraRouter spent 0.00s answering queries (0.01ms on average).
+Success.
+Generando rutas aleatorias...
+Ruta seleccionada: 8 nodos distintos
+Rutas generadas y guardadas en /home/tesis/Documentos/rl_training/ns-3-dev/mapas/urban/platooning_urban.rou.xml
+Loading net-file from './mapas/urban/map_urban.net.xml' ... done (15ms).
+Loading additional-files from './mapas/urban/map_urban.poly.xml' ... done (26ms).
+Loading route-files incrementally from './mapas/urban/platooning_urban.rou.xml'
+Loading done.
+Simulation version v1_23_1+0328-c58cdcecd81 started with time: 0.00.
+Simulation ended at time: 3600.00.
+Reason: The final simulation step has been reached.
+Performance:
+ Duration: 0.40s
+ Real time factor: 8977.56
+ UPS: 29037.406484
+Vehicles:
+ Inserted: 25
+ Running: 0
+ Waiting: 0
+Ejecutando simulación con 20 interferentes...
+Duración de la simulacion: 100.01
+Data rate 1000000bps
+App inicia en 40.014 sec
+App se detiene en 100.01 sec
+Instaladas aplicaciones en nodos receptores
+Tx address: 7.0.0.2
+Rx address: 7.0.0.3
+Rx address: 7.0.0.4
+Rx address: 7.0.0.5
+Rx address: 7.0.0.3
+Rx address: 7.0.0.4
+Rx address: 7.0.0.5
+Rx address: 7.0.0.3
+Rx address: 7.0.0.4
+Rx address: 7.0.0.5
+Rx address: 7.0.0.3
+Rx address: 7.0.0.4
+Rx address: 7.0.0.5
+Starting simulation...
+Observation: 1 1 1 1 
+Action received: 2320
+Observation: 1 1 1 1 
+Action received: 1256
+Observation: 1 1 1 1 
+Action received: 513
+Observation: 1 1 1 1 
+Action received: 7869
+Observation: 1 1 1 1 
+Action received: 1722
+Observation: 1 1 1 1 
+Action received: 3967
+Observation: 1 1 1 1 
+Action received: 3853
+Observation: 1 1 1 1 
+Action received: 8246
+Observation: 1 1 1 1 
+Action received: 6738
+Observation: 1 1 1 1 
+Action received: 4814
+Observation: 1 1 1 1 
+Action received: 2013
+Observation: 1 1 1 1 
+Action received: 4412
+Observation: 1 1 1 1 
+Action received: 2280
+Observation: 1 1 1 1 
+Action received: 789
+Observation: 1 1 1 1 
+Action received: 5033
+Observation: 1 1 1 1 
+Action received: 865
+Observation: 1 1 1 1 
+Action received: 3084
+Observation: 1 1 1 1 
+Action received: 2286
+Observation: 1 1 1 1 
+Action received: 1770
+Observation: 1 1 1 1 
+Action received: 7201
+Observation: 1 1 1 1 
+Action received: 882
+Observation: 1 1 1 1 
+Action received: 4731
+Observation: 1 1 1 1 
+Action received: 6504
+Observation: 1 1 1 1 
+Action received: 5374
+Observation: 1 1 1 1 
+Action received: 6450
+Observation: 1 1 1 1 
+Action received: 1990
+Observation: 1 1 1 1 
+Action received: 3154
+Observation: 1 1 1 1 
+Action received: 7290
+Observation: 1 1 1 1 
+Action received: 644
+Observation: 1 1 1 1 
+Action received: 4325
+Observation: 1 1 1 1 
+Action received: 1678
+Observation: 1 1 1 1 
+Action received: 6493
+Observation: 1 1 1 1 
+Action received: 5211
+Observation: 1 1 1 1 
+Action received: 5983
+Observation: 1 1 1 1 
+Action received: 4654
+Observation: 1 1 1 1 
+Action received: 5520
+Observation: 1 1 1 1 
+Action received: 1594
+Observation: 1 1 1 1 
+Action received: 5424
+Observation: 1 1 1 1 
+Action received: 5265
+Observation: 1 1 1 1 
+Action received: 6390
+Observation: 1 1 1 1 
+Action received: 4021
+Observation: 1 1 1 1 
+Action received: 3361
+Observation: 1 1 1 1 
+Action received: 6438
+Observation: 1 1 1 1 
+Action received: 5489
+Observation: 1 1 1 1 
+Action received: 5651
+Observation: 1 1 1 1 
+Action received: 2290
+Observation: 1 1 1 1 
+Action received: 2321
+Observation: 1 1 1 1 
+Action received: 5431
+Observation: 1 1 1 1 
+Action received: 8078
+Observation: 1 1 1 1 
+Interferentes: 20 - Simulación: 2
+calling /usr/local/share/sumo/bin/duarouter --alternatives-output NUL -n ./mapas/urban/map_urban.net.xml -r trips.trips.xml --ignore-errors --begin 0.0 --end 500.0 --no-warnings --no-step-log -v -o ./mapas/urban/map_urban.rou.xml
+Loading net ... done.
+Skipped until: 0.00
+DijkstraRouter answered 474 queries and explored 13.20 edges on average.
+DijkstraRouter spent 0.01s answering queries (0.01ms on average).
+Success.
+Generando rutas aleatorias...
+Ruta seleccionada: 8 nodos distintos
+Rutas generadas y guardadas en /home/tesis/Documentos/rl_training/ns-3-dev/mapas/urban/platooning_urban.rou.xml
+Loading net-file from './mapas/urban/map_urban.net.xml' ... done (15ms).
+Loading additional-files from './mapas/urban/map_urban.poly.xml' ... done (26ms).
+Loading route-files incrementally from './mapas/urban/platooning_urban.rou.xml'
+Loading done.
+Simulation version v1_23_1+0328-c58cdcecd81 started with time: 0.00.
+Simulation ended at time: 3600.00.
+Reason: The final simulation step has been reached.
+Performance:
+ Duration: 0.37s
+ Real time factor: 9703.5
+ UPS: 29272.237197
+Vehicles:
+ Inserted: 25
+ Running: 0
+ Waiting: 0
+Ejecutando simulación con 20 interferentes...
+Duración de la simulacion: 100.01
+Data rate 1000000bps
+App inicia en 40.014 sec
+App se detiene en 100.01 sec
+Instaladas aplicaciones en nodos receptores
+Tx address: 7.0.0.2
+Rx address: 7.0.0.3
+Rx address: 7.0.0.4
+Rx address: 7.0.0.5
+Rx address: 7.0.0.3
+Rx address: 7.0.0.4
+Rx address: 7.0.0.5
+Rx address: 7.0.0.3
+Rx address: 7.0.0.4
+Rx address: 7.0.0.5
+Rx address: 7.0.0.3
+Rx address: 7.0.0.4
+Rx address: 7.0.0.5
+Starting simulation...
+Process was interrupted by the user
+Interferentes: 20 - Simulación: 3
+calling /usr/local/share/sumo/bin/duarouter --alternatives-output NUL -n ./mapas/urban/map_urban.net.xml -r trips.trips.xml --ignore-errors --begin 0.0 --end 500.0 --no-warnings --no-step-log -v -o ./mapas/urban/map_urban.rou.xml
+Loading net ... done.
+Skipped until: 0.00
+DijkstraRouter answered 474 queries and explored 13.20 edges on average.
+DijkstraRouter spent 0.00s answering queries (0.01ms on average).
+Success.
+Generando rutas aleatorias...
+Ruta seleccionada: 8 nodos distintos
+Rutas generadas y guardadas en /home/tesis/Documentos/rl_training/ns-3-dev/mapas/urban/platooning_urban.rou.xml
+Loading net-file from './mapas/urban/map_urban.net.xml' ... done (14ms).
+Loading additional-files from './mapas/urban/map_urban.poly.xml' ... done (26ms).
+Loading route-files incrementally from './mapas/urban/platooning_urban.rou.xml'
+Loading done.
+Simulation version v1_23_1+0328-c58cdcecd81 started with time: 0.00.
+Simulation ended at time: 3600.00.
+Reason: The final simulation step has been reached.
+Performance:
+ Duration: 0.36s
+ Real time factor: 9917.36
+ UPS: 30504.132231
+Vehicles:
+ Inserted: 25
+ Running: 0
+ Waiting: 0
+Ejecutando simulación con 20 interferentes...
