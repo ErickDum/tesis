@@ -1697,18 +1697,9 @@ NrSlUeMacSchedulerFixedMcs::DoNrSlAllocation(
         ///*
         if(method == 1)
         {
-            std::cout << "Candidatos: " << candResources.size() << std::endl;
-            for (const auto & cand : candResources) {
-                std::cout << "Candidate SFN: " << cand.sfn.Normalize()
-                        //<< ", Subchannel Start: " << static_cast<unsigned>(cand.slSubchannelStart)
-                        //<< ", Subchannel Length: " << static_cast<unsigned>(cand.slSubchannelLength)
-                        << ", Slot Power: " << static_cast<double>(cand.slPower)
-                        << ", Slot Sinr: " << static_cast<double>(cand.slSinr)
-                        << std::endl;}//*/
+            selectedTxOpps = SelectResourcesForBlindRetransmissions(candResources);
         }
-        
-
-        if (method == 2)
+        else if (method == 2)
         {
             selectedTxOpps = SelectResourcesBasedOnPower(candResources);
         }
@@ -1716,13 +1707,6 @@ NrSlUeMacSchedulerFixedMcs::DoNrSlAllocation(
         {
             selectedTxOpps = SelectResourcesProportionalFair(candResources);
         }
-        
-        else
-        {
-            selectedTxOpps = SelectResourcesForBlindRetransmissions(candResources);
-
-        }
-        
     }
     else
     {
