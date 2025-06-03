@@ -7,7 +7,7 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 from ns3gym import ns3env
-import time 
+import csv
 
 # DQN Model
 class DQN(nn.Module):
@@ -74,27 +74,23 @@ class ResourceAllocation:
         step_count = 0
 
         for episode in range(episodes):
+            print(f"Episode {episode + 1}")
             obs = self.env.reset()
-            print("Observation space:", env.observation_space)
-            print("Shape:", env.observation_space.shape)
             state = torch.tensor(obs, dtype=torch.float32)
             total_reward = 0
             done = False
-            
+
             while not done:
                 # Epsilon-greedy action
-                print("Episode:", episode, "Step:", step_count, "Epsilon:", epsilon, "State:", state)
                 if random.random() < epsilon:
                     action = random.randint(0, num_actions - 1)
                 else:
                     with torch.no_grad():
-                        print("Tomando accion")
                         q_vals = policy_dqn(state)
                         action = q_vals.argmax().item()
 
                 # Step environment
                 next_obs, reward, done, info = env.step(action)
-                print("Action taken:", action, "Next observation:", next_obs, "Reward:", reward, "Done:", done)
                 if next_obs is None:
                     print("No next observation, ending step")
                     continue
@@ -108,7 +104,6 @@ class ResourceAllocation:
 
                 # Learn
                 if len(memory) > self.mini_batch_size:
-                    print("Learning step")
                     batch = memory.sample(self.mini_batch_size)
                     self.optimize(batch, policy_dqn, target_dqn)
 
@@ -116,16 +111,28 @@ class ResourceAllocation:
                 if step_count > self.network_sync_rate:
                     target_dqn.load_state_dict(policy_dqn.state_dict())
 
-            
             # End of episode
-            rewards_per_episode.append(total_reward/step_count if step_count > 0 else 0)
-            epsilon = epsilon - 1/episodes
+            rewards_per_episode.append(total_reward / step_count if step_count > 0 else 0)
+            epsilon = epsilon - 1 / episodes
             epsilon_history.append(epsilon)
             step_count = 0
 
+            # Guardado cada 1000 episodios (empezando desde episodio 1)
+            if (episode + 1) % 1000 == 0:
+                # Guardar red neuronal
+                model_name = f"ResourceAllocation{episode+1}.pt"
+                torch.save(policy_dqn.state_dict(), model_name)
+
+                # Guardar CSV
+                csv_name = f"datos{episode+1}.csv"
+                with open(csv_name, mode='w', newline='') as file:
+                    writer = csv.writer(file)
+                    writer.writerow(["reward", "epsilon"])
+                    for r, e in zip(rewards_per_episode, epsilon_history):
+                        writer.writerow([r, e])
+
         # Close env
         self.env.close()
-        torch.save(policy_dqn.state_dict(), "ResourceAllocation.pt")
         return rewards_per_episode, epsilon_history
 
     def optimize(self, batch, policy_dqn, target_dqn):
@@ -157,14 +164,14 @@ class ResourceAllocation:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--start', type=int, default=1)
-    parser.add_argument('--iterations', type=int, default=20)
+    parser.add_argument('--iterations', type=int, default=10000)
     args = parser.parse_args()
 
     # ns3-gym parameters
     port = 5555
-    stepTime = 5.5
+    stepTime = 0.1
     seed = 0
-    simTime = 20
+    simTime = 40
     simArgs = {"--simTime": simTime}
     env = ns3env.Ns3Env(port=port, stepTime=stepTime, startSim=bool(args.start), simSeed=seed, simArgs=simArgs)
     # Optionally: env = ns3env.Ns3Env()
@@ -176,6 +183,6 @@ if __name__ == '__main__':
     # Optionally: plot results
     import matplotlib.pyplot as plt
     plt.plot(rewards)
-    plt.xlabel('Rewards per Episode')
-    plt.ylabel('Epsilon')
+    plt.xlabel('Episode')
+    plt.ylabel('Rewards')
     plt.show()
