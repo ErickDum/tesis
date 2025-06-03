@@ -63,6 +63,10 @@ python3 -m venv venv
 source venv/bin/activate
 cd ./contrib/opengym/ 
 pip install -U ./model/ns3gym
+pip install numpy
+pip install torch
+pip install gymnasium
+pip install matplotlib
 cd ../..
 
 echo "=============================================================="

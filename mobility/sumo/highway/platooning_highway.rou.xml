@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<routes>
+    <!-- Vehicle definitions -->
+    <vType id="leader" accel="3.0" decel="6.0" minGap="1" color="1,0,0" maxSpeed="19" lcStrategic="0" lcCooperative="0" lcSpeedGain="0" lcKeepRight="0" />
+    <vType id="follower" accel="3.0" decel="6.0" minGap="0.5" color="0,0,1" maxSpeed="19.1" lcStrategic="0" lcCooperative="0" lcSpeedGain="0" lcKeepRight="0" />
+    <vType id="back_intf" accel="3.0" decel="6.0" color="0,1,0" maxSpeed="19.1" speedFactor="1.0" speedDev="0.1" />
+    <vType id="front_intf" accel="3.0" decel="6.0" minGap="1" color="0,1,0" maxSpeed="19" speedFactor="1.0" speedDev="0.1" />
+    <vType id="intf" accel="3.0" decel="6.0" minGap="1" color="1,1,0" maxSpeed="15" speedFactor="1.0" speedDev="0.1" />
+    <!-- Platoon -->
+    <vehicle id="0" type="leader" depart="0.00" departLane="first" departSpeed="0">
+        <route edges="R1 R2 R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="1" type="follower" depart="0.00" departLane="first" departSpeed="0">
+        <route edges="R1 R2 R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="2" type="follower" depart="0.00" departLane="first" departSpeed="0">
+        <route edges="R1 R2 R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="3" type="follower" depart="0.00" departLane="first" departSpeed="0">
+        <route edges="R1 R2 R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <!-- Interferentes atras -->
+    <vehicle id="4" type="back_intf" depart="0.00" departLane="best" departSpeed="0">
+        <route edges="R1 R2 R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="5" type="back_intf" depart="0.00" departLane="best" departSpeed="0">
+        <route edges="R1 R2 R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="6" type="back_intf" depart="0.00" departLane="best" departSpeed="0">
+        <route edges="R1 R2 R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="7" type="back_intf" depart="0.00" departLane="best" departSpeed="0">
+        <route edges="R1 R2 R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="8" type="back_intf" depart="0.00" departLane="best" departSpeed="0">
+        <route edges="R1 R2 R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="9" type="back_intf" depart="0.00" departLane="best" departSpeed="0">
+        <route edges="R1 R2 R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="10" type="back_intf" depart="0.00" departLane="best" departSpeed="0">
+        <route edges="R1 R2 R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="11" type="back_intf" depart="0.00" departLane="best" departSpeed="0">
+        <route edges="R1 R2 R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="12" type="back_intf" depart="0.00" departLane="best" departSpeed="0">
+        <route edges="R1 R2 R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="13" type="back_intf" depart="0.00" departLane="best" departSpeed="0">
+        <route edges="R1 R2 R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="14" type="back_intf" depart="0.00" departLane="best" departSpeed="0">
+        <route edges="R1 R2 R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="15" type="back_intf" depart="0.00" departLane="best" departSpeed="0">
+        <route edges="R1 R2 R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="16" type="back_intf" depart="0.00" departLane="best" departSpeed="0">
+        <route edges="R1 R2 R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="17" type="back_intf" depart="0.00" departLane="best" departSpeed="0">
+        <route edges="R1 R2 R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="18" type="back_intf" depart="0.00" departLane="best" departSpeed="0">
+        <route edges="R1 R2 R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="19" type="back_intf" depart="0.00" departLane="best" departSpeed="0">
+        <route edges="R1 R2 R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <!-- Interferentes restantes -->
+    <!-- Interferentes adelante -->
+    <vehicle id="20" type="front_intf" depart="38.75" departLane="best" departSpeed="0">
+        <route edges="R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="21" type="front_intf" depart="38.75" departLane="best" departSpeed="0">
+        <route edges="R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="22" type="front_intf" depart="38.75" departLane="best" departSpeed="0">
+        <route edges="R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="23" type="front_intf" depart="38.75" departLane="best" departSpeed="0">
+        <route edges="R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="24" type="front_intf" depart="38.75" departLane="best" departSpeed="0">
+        <route edges="R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="25" type="front_intf" depart="38.75" departLane="best" departSpeed="0">
+        <route edges="R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="26" type="front_intf" depart="38.75" departLane="best" departSpeed="0">
+        <route edges="R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="27" type="front_intf" depart="38.75" departLane="best" departSpeed="0">
+        <route edges="R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="28" type="front_intf" depart="38.75" departLane="best" departSpeed="0">
+        <route edges="R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="29" type="front_intf" depart="38.75" departLane="best" departSpeed="0">
+        <route edges="R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="30" type="front_intf" depart="38.75" departLane="best" departSpeed="0">
+        <route edges="R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="31" type="front_intf" depart="38.75" departLane="best" departSpeed="0">
+        <route edges="R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="32" type="front_intf" depart="38.75" departLane="best" departSpeed="0">
+        <route edges="R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="33" type="front_intf" depart="38.75" departLane="best" departSpeed="0">
+        <route edges="R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="34" type="front_intf" depart="38.75" departLane="best" departSpeed="0">
+        <route edges="R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+    <vehicle id="35" type="front_intf" depart="38.75" departLane="best" departSpeed="0">
+        <route edges="R3 R4 R5 R6 R7 R8" />
+    </vehicle>
+</routes>

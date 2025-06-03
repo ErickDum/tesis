@@ -190,6 +190,7 @@ int
 main(int argc, char* argv[])
 {   
     uint32_t now = static_cast<uint32_t> (std::time (nullptr));
+    std::cout << now << std::endl;
     RngSeedManager::SetSeed (now);
     RngSeedManager::SetRun  (now % 1000);
 
@@ -221,8 +222,8 @@ main(int argc, char* argv[])
     uint16_t resourceAllocationMethod = 1;
 
     std::string simTag = "default";
-    std::string outputDir = "/home/erick/Escritorio/";
-    std::string mobility_file = "/home/erick/Documentos/ns-3-dev/scratch/mobility.tcl";
+    std::string outputDir = "/home/tesis/Escritorio/";
+    std::string mobility_file = "/home/tesis/Documentos/rl_training/ns-3-dev/scratch/mobility.tcl";
     // ****************************************************************************
 
     // ********************************** ARGUMENTOS ******************************
@@ -478,7 +479,7 @@ main(int argc, char* argv[])
         {   
             // Configuración de los nodos UE platooning
             nrHelper->SetUeAntennaAttribute("NumRows", UintegerValue(1));
-            nrHelper->SetUeAntennaAttribute("NumColumns", UintegerValue(2));
+            nrHelper->SetUeAntennaAttribute("NumColumns", UintegerValue(4));
             nrHelper->SetUeAntennaAttribute("AntennaElement",
                                             PointerValue(CreateObject<IsotropicAntennaModel>()));
 
@@ -486,8 +487,9 @@ main(int argc, char* argv[])
             nrHelper->SetUeMacTypeId(NrSlUeMac::GetTypeId());
             nrHelper->SetUeMacAttribute("EnableSensing", BooleanValue(true));
             nrHelper->SetUeMacAttribute("SensingMethod", UintegerValue(sensingMethod));     //Método de sensado: 0 antiguo, 1 nuevo
-            //Método de asignación de recursos:1 aleatorio con rsrp, 2 greedy, 3 proportional fair 
-            nrHelper->SetUeMacAttribute("ResourceAllocattionMethod", UintegerValue(resourceAllocationMethod));
+            //Método de asignación de recursos: 0 totalmente aleatorio, 1 aleatorio con rsrp, 2 greedy, 3 proportional fair 
+            std::cout << "Resource Allocation Method: " << resourceAllocationMethod << std::endl;
+            nrHelper->SetUeMacAttribute("ResourceAllocationMethod", UintegerValue(resourceAllocationMethod));
             nrHelper->SetUeMacAttribute("T1", UintegerValue(2));
             nrHelper->SetUeMacAttribute("T2", UintegerValue(10));
             nrHelper->SetUeMacAttribute("ActivePoolId", UintegerValue(0));
@@ -510,7 +512,7 @@ main(int argc, char* argv[])
 
             // Si es posible, ajustar T1/T2 para interferentes (ejemplo)
             nrHelper->SetUeMacAttribute("EnableSensing", BooleanValue(false));
-            nrHelper->SetUeMacAttribute("ResourceAllocattionMethod", UintegerValue(1));
+            nrHelper->SetUeMacAttribute("ResourceAllocationMethod", UintegerValue(1));
             nrHelper->SetUeMacAttribute("T1", UintegerValue(2)); // Valor distinto
             nrHelper->SetUeMacAttribute("T2", UintegerValue(10));
             nrHelper->SetUeMacAttribute("ActivePoolId", UintegerValue(0));
@@ -662,7 +664,7 @@ main(int argc, char* argv[])
     ptrFactoryInt->SetSlSensingWindow(100); // T0 en ms
     ptrFactoryInt->SetSlSelectionWindow(10);
     ptrFactoryInt->SetSlFreqResourcePscch(10); // PSCCH RBs
-    ptrFactoryInt->SetSlSubchannelSize(50);
+    ptrFactoryInt->SetSlSubchannelSize(25);
     ptrFactoryInt->SetSlMaxNumPerReserve(3);
     std::list<uint16_t> resourceReservePeriodListInt = {0, 100}; // ms
     ptrFactoryInt->SetSlResourceReservePeriodList(resourceReservePeriodListInt);
