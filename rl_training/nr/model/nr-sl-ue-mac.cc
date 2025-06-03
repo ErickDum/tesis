@@ -66,7 +66,7 @@ NrSlUeMac::GetTypeId()
                           UintegerValue(0),
                           MakeUintegerAccessor(&NrSlUeMac::SetsensingMethod, &NrSlUeMac::GetsensingMethod),
                           MakeUintegerChecker<uint8_t>(0, 2))
-            .AddAttribute("ResourceAllocattionMethod",
+            .AddAttribute("ResourceAllocationMethod",
                           "Resource allocation method to be used for NR Sidelink resource selection",
                           UintegerValue(0),
                           MakeUintegerAccessor(&NrSlUeMac::SetResourceAllocationMethod,
@@ -884,6 +884,7 @@ NrSlUeMac::GetCandidateResourcesPrivate(const SfnSf& sfn,
         //NS_FATAL_ERROR("Invalid sensing method " << +m_sensingMethod);
         //break;
     }///*
+
     return remainingCandidates;
 }
 

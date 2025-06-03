@@ -2097,10 +2097,10 @@ NrUePhy::PhyPscchPduReceived(const Ptr<Packet>& p, const SpectrumValue& psd)
     double sinr_est = 1 / ( (1 / (12 * rsrqLinear)) - 1);
     sinr_est ++;
 
-    int rbPorSubcanal = 50;
+    int rbPorSubcanal = 25;
     int rbParaPotencia = 10;
 
-    int numSubcanales = 5;
+    int numSubcanales = 10;
     //int BW = 15000*2*12;
 
     std::vector<double> powers; // Vector donde se guardarán las potencias
@@ -2272,10 +2272,6 @@ NrUePhy::SendSlExpectedTbInfo(const SfnSf& s)
 void
 NrUePhy::PhyPsschPduReceived(const Ptr<PacketBurst>& pb, const SpectrumValue& psd)
 {   
-    if (m_netDevice->GetNode()->GetId() == 1)
-    {
-        std::cout << "Recibido nodo: "  << m_netDevice->GetNode()->GetId() << std::endl;
-    }
     
     uint32_t nodeId = m_netDevice->GetNode()->GetId();
     m_phyPsschReceivedTrace(nodeId);

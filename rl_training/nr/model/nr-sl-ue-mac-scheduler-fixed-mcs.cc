@@ -18,9 +18,9 @@
 #include "ns3/node.h" 
 #include "ns3/nr-ue-phy.h"
 #include "ns3/nr-ue-net-device.h" // Para NrUeNetDevice
-
-
-
+#include "ns3/opengym-module.h"
+#include "ns3/callback.h"
+#include "ns3/simulator.h"
 
 #include <optional>
 #include <queue>
@@ -40,6 +40,7 @@ NS_OBJECT_ENSURE_REGISTERED(NrSlUeMacSchedulerFixedMcs);
 
 std::vector<uint32_t> packetCounts(4, 0); // Inicializa con 4 elementos (índices 0 a 3) en 0
 std::vector<uint32_t> States(4, 0);
+std::vector<uint8_t> DoActions(4, 0);
 
 TypeId
 NrSlUeMacSchedulerFixedMcs::GetTypeId(void)
@@ -75,9 +76,178 @@ NrSlUeMacSchedulerFixedMcs::GetTypeId(void)
     return tid;
 }
 
+Ptr<OpenGymSpace> 
+NrSlUeMacSchedulerFixedMcs::GetActSpace (void)
+{
+    uint32_t nodeNum = 8400;
+
+    Ptr<OpenGymDiscreteSpace> space = CreateObject<OpenGymDiscreteSpace> (nodeNum);
+    NS_LOG_UNCOND ("MyGetActionSpace: " << space);
+    //std::cout << "---2---" << std::endl;
+    return space;
+}
+
+Ptr<OpenGymSpace> 
+NrSlUeMacSchedulerFixedMcs::GetObsSpace (void)
+{ 
+    uint32_t nodeNum = 4;
+    uint32_t low = 0;
+    uint32_t high = 30;
+    std::vector<uint32_t> shape = {nodeNum,};
+    std::string dtype = TypeNameGet<uint32_t> ();
+    Ptr<OpenGymBoxSpace> space = CreateObject<OpenGymBoxSpace> (low, high, shape, dtype);
+    NS_LOG_UNCOND ("MyGetObservationSpace: " << space);
+    //std::cout << "---1---" << std::endl;
+    return space;
+}
+
+bool 
+NrSlUeMacSchedulerFixedMcs::GetGameOver ()            
+{ 
+    bool isGameOver = false;
+    static uint32_t stepCounter = 0;
+    stepCounter += 1;
+    
+    auto now = ns3::Simulator::Now();
+    //std::cout << "Tiempo de simulación: " << now.GetSeconds() << " s" << std::endl;
+    if (now >= ns3::Seconds(52))
+    { 
+        isGameOver = true;
+    }
+    NS_LOG_UNCOND ("MyGetGameOver: " << isGameOver);
+    //std::cout << "---5---" << std::endl;
+    return isGameOver;
+}
+
+Ptr<OpenGymDataContainer> 
+NrSlUeMacSchedulerFixedMcs::GetObservation (void)
+{ 
+    uint32_t nodeNum = 4;
+
+    std::vector<uint32_t> shape = {nodeNum,};
+    Ptr<OpenGymBoxContainer<uint32_t> > box = CreateObject<OpenGymBoxContainer<uint32_t> >(shape);
+
+    // generate random data
+    for (uint32_t i = 0; i < nodeNum; i++){
+        box->AddValue(States[i]);
+    }
+
+    NS_LOG_UNCOND ("MyGetObservation: " << box);
+    //std::cout << "---3---" << std::endl;
+    std::cout << "Observation: ";
+    for (uint32_t i = 0; i < nodeNum; i++) {
+        std::cout << box->GetValue(i) << " ";
+    }
+    std::cout << std::endl;
+
+    return box;
+}
+
+float 
+NrSlUeMacSchedulerFixedMcs::GetReward (void)
+{ 
+    double reward = 0.0;
+    auto RC = DoActions[1];
+    auto N_rx = States[0];
+
+    if (N_rx > 0) {
+        double factor = std::pow(2.0, 0.5 * N_rx);
+        double diferencia = std::abs(static_cast<double>(N_rx) / 3 - static_cast<double>(RC) / 15);
+        reward = factor * (1.0 - diferencia);
+    } else {
+        reward = -static_cast<double>(RC + 15 - 2) / (15 - 1);
+    }
+    
+    //std::cout << "---4---" << std::endl;
+    return reward-1;
+}
+
+bool
+NrSlUeMacSchedulerFixedMcs::ExecuteAction (Ptr<OpenGymDataContainer> actionContainer)
+{
+    // Convertir a DiscreteContainer
+    Ptr<OpenGymDiscreteContainer> discrete =
+        DynamicCast<OpenGymDiscreteContainer> (actionContainer);
+
+    // Volcar el único valor en el vector miembro
+    m_lastAction.clear ();
+    m_lastAction.push_back (discrete->GetValue ());
+    std::vector<uint8_t> Actions(4, 0);
+    Actions[0] = (uint8_t)((m_lastAction[0]/2100)+1);
+    Actions[1] = (uint8_t)((m_lastAction[0]%2100)/140)+1;
+
+    if(m_lastAction[0]%140 <30)
+    {
+        Actions[2] = 1;
+        Actions[3] = uint8_t(m_lastAction[0]%140)+1;
+    }
+    else if (m_lastAction[0]%140 <59)
+    {
+        Actions[2] = 2;
+        Actions[3] = uint8_t(m_lastAction[0]%140)-29;
+    }
+    else if (m_lastAction[0]%140 <87)
+    {
+        Actions[2] = 3;
+        Actions[3] = uint8_t(m_lastAction[0]%140)-58;
+    }
+    else if (m_lastAction[0]%140 <114)
+    {
+        Actions[2] = 4;
+        Actions[3] = uint8_t(m_lastAction[0]%140)-86;
+    }
+    else if (m_lastAction[0]%140 <140)
+    {
+        Actions[2] = 5;
+        Actions[3] = uint8_t(m_lastAction[0]%140)-113;
+    }
+    
+
+    //std::cout << "---6---" << std::endl;
+    //std::cout << "Action received: " << m_lastAction[0] << std::endl;
+    //std::cout << "Action decoded1: " << (uint32_t)Actions[0] << " " << (uint32_t)Actions[1] << " "
+              //<< (uint32_t)Actions[2] << " " << (uint32_t)Actions[3] << std::endl;
+    DoActions = Actions;
+    return true;
+}
+
+/*
+void
+NrSlUeMacSchedulerFixedMcs::ScheduleNextStateRead(double envStepTime,
+                                                  Ptr<OpenGymInterface> openGym)
+{
+  // Reprograma la siguiente llamada tras envStepTime segundos
+  Simulator::Schedule(Seconds(envStepTime),
+                      &NrSlUeMacSchedulerFixedMcs::ScheduleNextStateRead,
+                      this,
+                      envStepTime,
+                      openGym);
+  // Notifica a Python para que recoja estado/reward y envíe acción
+  openGym->NotifyCurrentState();
+}*/
+
+
 NrSlUeMacSchedulerFixedMcs::NrSlUeMacSchedulerFixedMcs()
 {
     NS_LOG_FUNCTION(this);
+    // ----- OpenGYm
+    m_openGym = CreateObject<OpenGymInterface>(5555); // Opengym port
+    m_openGym->SetGetObservationSpaceCb ( MakeCallback(&NrSlUeMacSchedulerFixedMcs::GetObsSpace, this) );
+    m_openGym->SetGetActionSpaceCb      ( MakeCallback(&NrSlUeMacSchedulerFixedMcs::GetActSpace, this) );
+    m_openGym->SetGetObservationCb      ( MakeCallback(&NrSlUeMacSchedulerFixedMcs::GetObservation, this) );
+    m_openGym->SetGetRewardCb           ( MakeCallback(&NrSlUeMacSchedulerFixedMcs::GetReward, this) );
+    m_openGym->SetGetGameOverCb         ( MakeCallback(&NrSlUeMacSchedulerFixedMcs::GetGameOver, this) );
+    m_openGym->SetExecuteActionsCb      ( MakeCallback(&NrSlUeMacSchedulerFixedMcs::ExecuteAction, this) );
+
+    //Simulator::Schedule(
+        //Seconds(60.0),
+        //&NrSlUeMacSchedulerFixedMcs::ScheduleNextStateRead,
+        //this,
+        //envStepTime,
+        //m_openGym
+    //);
+
+
     m_grantSelectionUniformVariable = CreateObject<UniformRandomVariable>();
     m_destinationUniformVariable = CreateObject<UniformRandomVariable>();
     m_ueSelectedUniformVariable = CreateObject<UniformRandomVariable>();
@@ -1496,6 +1666,7 @@ NrSlUeMacSchedulerFixedMcs::OverlappedResources(const SfnSf& firstSfn,
     if (firstSfn == secondSfn)
     {
         if (std::max(firstStart, secondStart) <
+           
             std::min(firstStart + firstLength, secondStart + secondLength))
         {
             return true;
@@ -1744,16 +1915,33 @@ NrSlUeMacSchedulerFixedMcs::DoNrSlAllocation(
         ///*
         if(method == 1)
         {
-           int a = 0;
-           a++;
+           /*std::cout << "Candidatos: " << candResources.size() << std::endl;
+            for (const auto & cand : candResources) {
+                std::cout << "Candidate SFN: " << cand.sfn.Normalize()
+                        //<< ", Subchannel Start: " << static_cast<unsigned>(cand.slSubchannelStart)
+                        //<< ", Subchannel Length: " << static_cast<unsigned>(cand.slSubchannelLength)
+                        << ", Slot Power: " << static_cast<double>(cand.slPower)
+                        << ", Slot Sinr: " << static_cast<double>(cand.slSinr)
+                        << std::endl;}//*/
+            selectedTxOpps = SelectResourcesForBlindRetransmissions(candResources);
+            /*std::cout << "Restantes: " << selectedTxOpps.size() << std::endl;
+            for (const auto & cand : selectedTxOpps) {
+                std::cout << "Candidate SFN: " << cand.sfn.Normalize()
+                        //<< ", Subchannel Start: " << static_cast<unsigned>(cand.slSubchannelStart)
+                        //<< ", Subchannel Length: " << static_cast<unsigned>(cand.slSubchannelLength)
+                        << ", Slot Power: " << static_cast<double>(cand.slPower)
+                        << ", Slot Sinr: " << static_cast<double>(cand.slSinr)
+                        << std::endl;}//*/
         }
-        
-
-        if (method == 2)
+        else if (method == 2)
         {
             selectedTxOpps = SelectResourcesBasedOnPower(candResources);
         }
         else if (method == 3)
+        {
+            selectedTxOpps = SelectResourcesProportionalFair(candResources);
+        }
+        else if (method == 4)
         {
             /*Rangos de la media:
                  <0
@@ -1774,7 +1962,6 @@ NrSlUeMacSchedulerFixedMcs::DoNrSlAllocation(
             //m_cResel = 150;
             //m_reselCounter = 15;
             ConnectPhyPsschRxCallbackToUePhys();
-            std::cout << "Asignandoooo: " << candResources.size() << std::endl;
             double suma = 0.0;
             for (const auto& cand : candResources) {
                 suma += cand.slSinr;
@@ -1816,52 +2003,35 @@ NrSlUeMacSchedulerFixedMcs::DoNrSlAllocation(
                 States[3] = 4;
             }
 
-                // Paso 1: encontrar el valor máximo
-                uint32_t maxValor = *std::max_element(packetCounts.begin(), packetCounts.end());
-                int nrx = 0;
-                // Verificar que no sea cero para evitar división por cero
-                if (maxValor > 0)
+            // Paso 1: encontrar el valor máximo
+            uint32_t maxValor = *std::max_element(packetCounts.begin(), packetCounts.end());
+            int nrx = 0;
+            // Verificar que no sea cero para evitar división por cero
+            if (maxValor > 0)
+            {
+                for (const auto& valor : packetCounts) 
                 {
-                    for (const auto& valor : packetCounts) 
-                    {
-                        double proporcion = static_cast<double>(valor) / maxValor;
-                        if (proporcion >= 0.9) {
-                            nrx++;
-                        }
+                    double proporcion = static_cast<double>(valor) / maxValor;
+                    if (proporcion >= 0.9) {
+                        nrx++;
                     }
                 }
-            
-                States[0] = nrx;
-                States[1] = candResources.size();
-                
-                std::cout << "Estados: " << States[0] << ", " << States[1] << ", " << States[2] << ", " << States[3] << std::endl;
-
-            selectedTxOpps = SelectResourcesProportionalFair(candResources);
-            packetCounts.assign(4, 0); // Reinicia el vector con 4 elementos en 0
-            
-
-        }
+            }
         
-        else
-        {
-            /*std::cout << "Candidatos: " << candResources.size() << std::endl;
-            for (const auto & cand : candResources) {
-                std::cout << "Candidate SFN: " << cand.sfn.Normalize()
-                        //<< ", Subchannel Start: " << static_cast<unsigned>(cand.slSubchannelStart)
-                        //<< ", Subchannel Length: " << static_cast<unsigned>(cand.slSubchannelLength)
-                        << ", Slot Power: " << static_cast<double>(cand.slPower)
-                        << ", Slot Sinr: " << static_cast<double>(cand.slSinr)
-                        << std::endl;}//*/
-            selectedTxOpps = SelectResourcesForBlindRetransmissions(candResources);
-            /*std::cout << "Restantes: " << selectedTxOpps.size() << std::endl;
-            for (const auto & cand : selectedTxOpps) {
-                std::cout << "Candidate SFN: " << cand.sfn.Normalize()
-                        //<< ", Subchannel Start: " << static_cast<unsigned>(cand.slSubchannelStart)
-                        //<< ", Subchannel Length: " << static_cast<unsigned>(cand.slSubchannelLength)
-                        << ", Slot Power: " << static_cast<double>(cand.slPower)
-                        << ", Slot Sinr: " << static_cast<double>(cand.slSinr)
-                        << std::endl;}//*/
+            States[0] = nrx;
+            States[1] = candResources.size();
+            std::cout << "Estados: " << States[0] << ", " << States[1] << ", " << States[2] << ", " << States[3] << std::endl;
+            packetCounts.assign(4, 0); // Reinicia el vector con 4 elementos en 0
 
+            // --- NS3 GYM
+            // 1) Notifica a Python el estado actual
+            //std::cout << "AAAAAAaaAaAaAaaaAAaA" << std::endl;
+            m_openGym->NotifyCurrentState ();
+            //std::cout << "dddDddDDddDDddDDdddD" << std::endl;
+            selectedTxOpps = SelectResourcesMDP(candResources,DoActions);
+
+            
+            
         }
         
     }
@@ -1934,7 +2104,6 @@ std::list<SlResourceInfo>
 NrSlUeMacSchedulerFixedMcs::SelectResourcesForBlindRetransmissions(std::list<SlResourceInfo> txOpps)
 {
     NS_LOG_FUNCTION(this << txOpps.size());
-
     uint8_t totalTx = GetSlMaxTxTransNumPssch();
     std::list<SlResourceInfo> newTxOpps;
     if (txOpps.size() > totalTx)
@@ -2082,6 +2251,144 @@ NrSlUeMacSchedulerFixedMcs::SelectResourcesProportionalFair(std::list<SlResource
     }
 
     // sort the list by SfnSf before returning
+    newTxOpps.sort();
+    NS_ASSERT_MSG(newTxOpps.size() <= totalTx,
+                  "Number of selected slots exceeded total number of TX");
+    return newTxOpps;
+}
+
+// Rotar / voltear un cuadrante de tamaño ‘n’
+static void
+RotHilbert (int n, int &x, int &y, int rx, int ry)
+{
+    if (ry == 0)
+    {
+        if (rx == 1)
+        {
+            x = n - 1 - x;
+            y = n - 1 - y;
+        }
+        // Intercambiar x e y
+        int t = x;
+        x = y;
+        y = t;
+    }
+}
+
+// Convierte (x,y) en ‘d’ siguiendo la curva de Hilbert de tamaño n×n, n=power_of_2
+static int
+Xy2D (int n, int x, int y)
+{
+    int rx, ry, s, d = 0;
+    for (s = n / 2; s > 0; s /= 2)
+    {
+        rx = (x & s) > 0 ? 1 : 0;
+        ry = (y & s) > 0 ? 1 : 0;
+        d += s * s * ((3 * rx) ^ ry);
+        RotHilbert(s, x, y, rx, ry);
+    }
+    return d;
+}
+
+
+std::list<SlResourceInfo>
+NrSlUeMacSchedulerFixedMcs::SelectResourcesMDP(std::list<SlResourceInfo> txOpps,
+                                               std::vector<uint8_t> Actions)
+{
+    NS_LOG_FUNCTION(this << txOpps.size());
+
+    uint8_t totalTx = GetSlMaxTxTransNumPssch();
+    std::list<SlResourceInfo> newTxOpps;
+
+    if (Actions[0] == 1)
+    {
+        txOpps.sort();
+    }
+    else if (Actions[0] == 2)
+    {
+        txOpps.sort([](const SlResourceInfo &a, const SlResourceInfo &b) {
+            return a.slSubchannelStart < b.slSubchannelStart;
+        });
+    }
+    else if (Actions[0] == 3)
+    {
+        // Morton tal como antes (se mantiene igual)
+        txOpps.sort([](const SlResourceInfo &a, const SlResourceInfo &b) {
+            uint16_t ax = static_cast<uint16_t>(a.sfn.Normalize());
+            uint16_t ay = static_cast<uint16_t>(a.slSubchannelStart);
+            uint16_t bx = static_cast<uint16_t>(b.sfn.Normalize());
+            uint16_t by = static_cast<uint16_t>(b.slSubchannelStart);
+
+            uint32_t mortonA = 0, mortonB = 0;
+            for (int i = 0; i < 16; ++i)
+            {
+                uint32_t bitX = (static_cast<uint32_t>(ax) >> i) & 0x1u;
+                uint32_t bitY = (static_cast<uint32_t>(ay) >> i) & 0x1u;
+                mortonA |= (bitX << (2 * i + 1));
+                mortonA |= (bitY << (2 * i));
+
+                uint32_t bitXb = (static_cast<uint32_t>(bx) >> i) & 0x1u;
+                uint32_t bitYb = (static_cast<uint32_t>(by) >> i) & 0x1u;
+                mortonB |= (bitXb << (2 * i + 1));
+                mortonB |= (bitYb << (2 * i));
+            }
+            return (mortonA < mortonB);
+        });
+    }
+    else if (Actions[0] == 4)
+    {
+        // ----- NUEVO BLOQUE: Hilbert usando xy2d -----
+        // Definimos nBits = 10 => gridSize = 1 << 10 = 1024
+        const int nBits = 10;
+        const int gridSize = 1 << nBits;
+
+        txOpps.sort([&](const SlResourceInfo &a, const SlResourceInfo &b) {
+            // Extraer coordenadas limitadas a [0, gridSize)
+            int ax = static_cast<int>(a.sfn.Normalize()) & (gridSize - 1);
+            int ay = static_cast<int>(a.slSubchannelStart) & (gridSize - 1);
+            int bx = static_cast<int>(b.sfn.Normalize()) & (gridSize - 1);
+            int by = static_cast<int>(b.slSubchannelStart) & (gridSize - 1);
+
+            // Calcular índice de Hilbert en un espacio de 1024x1024
+            int hA = Xy2D(gridSize, ax, ay);
+            int hB = Xy2D(gridSize, bx, by);
+            return (hA < hB);
+        });
+        // ----- FIN NUEVO BLOQUE -----
+    }
+
+    m_reselCounter = Actions[1];
+    m_cResel = m_reselCounter * 10;
+
+    std::vector<SlResourceInfo> txOppsVec(txOpps.begin(), txOpps.end());
+    size_t totalRecursos = txOppsVec.size();
+    size_t start = Actions[3];
+    size_t count = Actions[2];
+
+    if (totalTx >= totalRecursos)
+    {
+        newTxOpps.assign(txOpps.begin(), txOpps.end());
+    }
+    else
+    {
+        if (start + count > totalRecursos)
+        {
+            if (count > totalRecursos)
+            {
+                start = 0;
+                count = totalRecursos;
+            }
+            else
+            {
+                start = totalRecursos - count;
+            }
+        }
+        for (size_t i = 0; i < count; ++i)
+        {
+            newTxOpps.push_back(txOppsVec[start + i]);
+        }
+    }
+
     newTxOpps.sort();
     NS_ASSERT_MSG(newTxOpps.size() <= totalTx,
                   "Number of selected slots exceeded total number of TX");

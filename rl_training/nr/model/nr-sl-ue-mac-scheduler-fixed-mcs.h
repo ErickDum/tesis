@@ -14,6 +14,7 @@
 #include "nr-sl-ue-mac.h"
 
 #include <ns3/random-variable-stream.h>
+#include "ns3/opengym-module.h"
 
 #include <functional>
 #include <list>
@@ -58,8 +59,18 @@ class NrSlUeMacSchedulerFixedMcs : public NrSlUeMacScheduler
      * \brief NrSlUeMacSchedulerFixedMcs destructor
      */
     ~NrSlUeMacSchedulerFixedMcs() override;
+    Ptr<OpenGymSpace> GetActSpace(void);
+    Ptr<OpenGymSpace> GetObsSpace(void);
+    bool GetGameOver(void);
+    Ptr<OpenGymDataContainer> GetObservation(void);
+    float GetReward(void);
+    bool ExecuteAction(Ptr<OpenGymDataContainer> actionContainer);
+
 
   private:
+
+    std::vector<uint32_t> m_lastAction;
+    Ptr<OpenGymInterface> m_openGym;
     void DoRemoveNrSlLcConfigReq(uint8_t lcid, uint32_t dstL2Id) override;
 
     void DoSchedNrSlRlcBufferReq(
@@ -464,6 +475,24 @@ class NrSlUeMacSchedulerFixedMcs : public NrSlUeMacScheduler
      */
     std::list<SlResourceInfo> SelectResourcesProportionalFair(
         std::list<SlResourceInfo> txOpps);
+
+    /**
+     * \brief Select the resources acording to the MDP defined
+     *
+     * If K denotes the candidate resources, and N_PSSCH_maxTx is the
+     * maximum number of PSSCH configured transmissions, then:
+     *
+     * N_Selected = N_PSSCH_maxTx , if K >= N_PSSCH_maxTx
+     * otherwise;
+     * N_Selected = K
+     *
+     *
+     * \param txOpps The list of the candidate resources
+     * \param Actions The actions to be taken, which are the MDP actions
+     * \return The list of selected resources
+     */
+    std::list<SlResourceInfo> SelectResourcesMDP(
+        std::list<SlResourceInfo> txOpps, std::vector<uint8_t> Actions);
 
     /**
      * \brief Randomly select resources for a grant from the candidate resources,
