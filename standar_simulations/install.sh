@@ -15,7 +15,7 @@ echo "=============================================================="
 echo "============== INSTALACION DE LIBRERIAS NS3 =================="
 echo "=============================================================="
 sudo apt-get install libc6-dev -y
-sudo apt-get install sqlite sqlite3 libsqlite3-dev -y 
+apt-get install sqlite sqlite3 libsqlite3-dev -y 
 sudo apt-get install sqlite3 libsqlite3-dev -y
 sudo apt-get install libeigen3-dev -y
 
@@ -23,8 +23,6 @@ sudo apt-get install libeigen3-dev -y
 echo "=============================================================="
 echo "================== REPOSITORIO 5G LENA ======================="
 echo "=============================================================="
-
-
 git clone https://gitlab.com/cttc-lena/ns-3-dev.git
 cd ns-3-dev
 git checkout tags/ns-3-dev-v2x-v1.1 -b ns-3-dev-v2x-v1.1-branch
@@ -32,19 +30,7 @@ cd contrib
 git clone https://gitlab.com/cttc-lena/nr.git
 cd nr
 git checkout tags/v2x-1.1 -b v2x-1.1-branch
-
-rm -rf helper
-rm -rf model
-cd ../../..
-cp ./model ./ns-3-dev/contrib/nr/model
-cp ./helper ./ns-3-dev/contrib/nr/helper
-
-
-cd ${HOME}/
-mkdir standar_simulations
-
-
-vm ./nr ./ns-3-dev/contrib/
+cd ../..
 cd ns-3-dev
 ./ns3 configure --enable-examples
 ./ns3 build
