@@ -15,8 +15,6 @@ generate_triangular() {
 }
 
 # Parametros de simulacion
-interferentes_maximos=33
-paso_interferentes=2
 tamano_platoon=4
 init_time=40
 sim_time=60
@@ -53,6 +51,8 @@ for ((i = 1; i <= total_runs; i++)); do
 
     int_num=$(generate_triangular)
     echo "Episodio $i con $int_num interferentes"
-    #./ns3 run "scratch/v2x.cc --resourceAllocationMethod=4 --IntNum=$int_num"
-    ./ns3 run "scratch/v2x.cc --slBearerActivationTime=$init_time --simTime=$sim_time --ueNum=$tamano_platoon --IntNum=$int_num  --outputDir=$path --sensingMethod=1 --resourceAllocationMethod=4" 
+    #Poner en orden todos los paths de los diferenes ns3
+    /home/carlos/Documents/rl_training/2/ns-3-dev/ns3 run "scratch/v2x.cc --slBearerActivationTime=$init_time --simTime=$sim_time --ueNum=$tamano_platoon --IntNum=$int_num --sensingMethod=1 --resourceAllocationMethod=4" &
+    sleep 1
+    ./ns3 run "scratch/v2x.cc --slBearerActivationTime=$init_time --simTime=$sim_time --ueNum=$tamano_platoon --IntNum=$int_num --sensingMethod=1 --resourceAllocationMethod=4" &
 done
