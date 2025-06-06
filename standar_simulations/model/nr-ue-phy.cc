@@ -2088,7 +2088,7 @@ NrUePhy::PhyPscchPduReceived(const Ptr<Packet>& p, const SpectrumValue& psd)
     double sinr_est = 1 / ( (1 / (12 * rsrqLinear)) - 1);
     sinr_est ++;
 
-    int rbPorSubcanal = 50;
+    int rbPorSubcanal = 25;
     int rbParaPotencia = 10;
 
     int numSubcanales = 5;

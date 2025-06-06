@@ -31,6 +31,5 @@ git clone https://gitlab.com/cttc-lena/nr.git
 cd nr
 git checkout tags/v2x-1.1 -b v2x-1.1-branch
 cd ../..
-cd ns-3-dev
 ./ns3 configure -d optimized
 ./ns3 build
