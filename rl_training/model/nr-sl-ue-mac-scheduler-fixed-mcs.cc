@@ -110,7 +110,7 @@ NrSlUeMacSchedulerFixedMcs::GetGameOver ()
     
     auto now = ns3::Simulator::Now();
     //std::cout << "Tiempo de simulación: " << now.GetSeconds() << " s" << std::endl;
-    if (now >= ns3::Seconds(52))
+    if (now >= ns3::Seconds(100))
     { 
         isGameOver = true;
     }
@@ -134,11 +134,11 @@ NrSlUeMacSchedulerFixedMcs::GetObservation (void)
 
     NS_LOG_UNCOND ("MyGetObservation: " << box);
     //std::cout << "---3---" << std::endl;
-    std::cout << "Observation: ";
-    for (uint32_t i = 0; i < nodeNum; i++) {
-        std::cout << box->GetValue(i) << " ";
-    }
-    std::cout << std::endl;
+    //std::cout << "Observation: ";
+    //for (uint32_t i = 0; i < nodeNum; i++) {
+    //    std::cout << box->GetValue(i) << " ";
+    //}
+    //std::cout << std::endl;
 
     return box;
 }
@@ -146,20 +146,17 @@ NrSlUeMacSchedulerFixedMcs::GetObservation (void)
 float 
 NrSlUeMacSchedulerFixedMcs::GetReward (void)
 { 
+    uint8_t RC = DoActions[1];
+    uint32_t N_rx = States[0];
     double reward = 0.0;
-    auto RC = DoActions[1];
-    auto N_rx = States[0];
 
-    if (N_rx > 0) {
-        double factor = std::pow(2.0, 0.5 * N_rx);
-        double diferencia = std::abs(static_cast<double>(N_rx) / 3 - static_cast<double>(RC) / 15);
-        reward = factor * (1.0 - diferencia);
+    if (N_rx > 1) {
+        reward = (static_cast<double>(N_rx) / 3.0) * (static_cast<double>(RC) / 15.0);
     } else {
-        reward = -static_cast<double>(RC + 15 - 2) / (15 - 1);
+        reward = - (2.0 - static_cast<double>(N_rx)) * (static_cast<double>(RC) / 30.0);
     }
-    
-    //std::cout << "---4---" << std::endl;
-    return reward-1;
+
+    return static_cast<float>(reward);
 }
 
 bool
@@ -2020,7 +2017,7 @@ NrSlUeMacSchedulerFixedMcs::DoNrSlAllocation(
         
             States[0] = nrx;
             States[1] = candResources.size();
-            std::cout << "Estados: " << States[0] << ", " << States[1] << ", " << States[2] << ", " << States[3] << std::endl;
+            // std::cout << "Estados: " << States[0] << ", " << States[1] << ", " << States[2] << ", " << States[3] << std::endl;
             packetCounts.assign(4, 0); // Reinicia el vector con 4 elementos en 0
 
             // --- NS3 GYM

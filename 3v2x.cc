@@ -26,170 +26,14 @@ using namespace ns3;
 
 NS_LOG_COMPONENT_DEFINE("v2x");
 
-/*
- * Metodos globales
- */
-
-/**
- * \brief Método para escuchar el rastro SlPscchScheduling de NrUeMac, que se activa
- *        al transmitir el formato SCI 1-A desde UE MAC.
- *
- * \param pscchStats 
- * \param pscchStatsParams 
- */
-void
-NotifySlPscchScheduling(UeMacPscchTxOutputStats* pscchStats,
-                        const SlPscchUeMacStatParameters pscchStatsParams)
-{
-    pscchStats->Save(pscchStatsParams);
-}
-
-/**
- * \brief Método para escuchar el rastro SlPsschScheduling de NrUeMac, que se activa
- *        al transmitir el formato SCI 2-A y datos desde UE MAC.
- *
- * \param psschStats 
- * \param psschStatsParams
- */
-void
-NotifySlPsschScheduling(UeMacPsschTxOutputStats* psschStats,
-                        const SlPsschUeMacStatParameters psschStatsParams)
-{
-    psschStats->Save(psschStatsParams);
-}
-
-/**
- * \brief Método para escuchar el rastro RxPscchTraceUe de NrSpectrumPhy, que se activa
- *        al recibir el formato SCI 1-A.
- *
- * \param pscchStats 
- * \param pscchStatsParams 
- */
-void
-NotifySlPscchRx(UePhyPscchRxOutputStats* pscchStats,
-                const SlRxCtrlPacketTraceParams pscchStatsParams)
-{
-    pscchStats->Save(pscchStatsParams);
-}
-
-/**
- * \brief Método para escuchar el rastro RxPsschTraceUe de NrSpectrumPhy, que se activa
- *        al recibir el formato SCI 2-A y datos.
- *
- * \param psschStats 
- * \param psschStatsParams 
- */
-void
-NotifySlPsschRx(UePhyPsschRxOutputStats* psschStats,
-                const SlRxDataPacketTraceParams psschStatsParams)
-{
-    psschStats->Save(psschStatsParams);
-}
-
-/**
- * \brief Método para escuchar los rastros a nivel de aplicación de tipo TxWithAddresses
- *        y RxWithAddresses.
- * \param stats 
- * \param node 
- * \param localAddrs 
- * \param txRx 
- * \param p 
- * \param srcAddrs 
- * \param dstAddrs 
- * \param seqTsSizeHeader 
- */
-void
-UePacketTraceDb(UeToUePktTxRxOutputStats* stats,
-                Ptr<Node> node,
-                const Address& localAddrs,
-                std::string txRx,
-                Ptr<const Packet> p,
-                const Address& srcAddrs,
-                const Address& dstAddrs,
-                const SeqTsSizeHeader& seqTsSizeHeader)
-{
-    uint32_t nodeId = node->GetId();
-    uint64_t imsi = node->GetDevice(0)->GetObject<NrUeNetDevice>()->GetImsi();
-    uint32_t seq = seqTsSizeHeader.GetSeq();
-    uint32_t pktSize = p->GetSize() + seqTsSizeHeader.GetSerializedSize();
-
-    stats->Save(txRx, localAddrs, nodeId, imsi, pktSize, srcAddrs, dstAddrs, seq);
-}
-
-/*
- * Variables globales para contar paquetes y bytes TX/RX.
- */
-
-uint32_t rxByteCounter = 0; 
-uint32_t txByteCounter = 0; 
-uint32_t rxPktCounter = 0;  
-uint32_t txPktCounter = 0; 
-
-/**
- * \brief Método para escuchar el rastro de la aplicación de sumidero de paquetes Rx.
- * \param packet 
- */
-void
-ReceivePacket(Ptr<const Packet> packet, const Address&)
-{
-    rxByteCounter += packet->GetSize();
-    rxPktCounter++;
-}
-
-/**
- * \brief Método para escuchar el rastro de la aplicación de transmisión Tx.
- * \param packet 
- */
-void
-TransmitPacket(Ptr<const Packet> packet)
-{
-    txByteCounter += packet->GetSize();
-    txPktCounter++;
-}
-
-/*
- * Variable global utilizada para calcular PIR
- */
-uint64_t pirCounter =
-    0; //!< contador para contar cuántas veces calculamos el PIR. Se utiliza para calcular el PIR promedio
-Time lastPktRxTime; //!< Variable global para almacenar el tiempo de RX de un paquete
-Time pir;           //!< Variable global para almacenar el valor de PIR
-
-/**
- * \brief Este método escucha el rastro de la aplicación de sumidero de paquetes Rx.
- * \param packet 
- * \param from 
- */
-void
-ComputePir(Ptr<const Packet> packet, const Address&)
-{
-    if (pirCounter == 0 && lastPktRxTime.GetSeconds() == 0.0)
-    {
-        // this the first packet, just store the time and get out
-        lastPktRxTime = Simulator::Now();
-        return;
-    }
-    pir = pir + (Simulator::Now() - lastPktRxTime);
-    lastPktRxTime = Simulator::Now();
-    pirCounter++;
-}
-
-
-void PrintIpAddresses(NodeContainer ueContainer, Ipv4InterfaceContainer interfaceContainer, std::string containerName) {
-    std::cout << "Direcciones IP de " << containerName << ":" << std::endl;
-    for (uint32_t i = 0; i < ueContainer.GetN(); ++i) {
-        Ptr<Node> ue = ueContainer.Get(i);
-        Ptr<Ipv4> ipv4 = ue->GetObject<Ipv4>();
-        Ipv4Address ipAddr = ipv4->GetAddress(1, 0).GetLocal();  // Interface 1, índice 0
-        std::cout << "UE " << i << " - IP: " << ipAddr << std::endl;
-    }
-}
-
 // *********************************************** FUNCION PRINCIPAL ***********************************************
 int
 main(int argc, char* argv[])
 {   
-    RngSeedManager::SetSeed(static_cast<uint32_t>(128));
+    uint32_t now = static_cast<uint32_t> (std::time (nullptr));
+    std::cout << now << std::endl;
+    RngSeedManager::SetSeed (now);
+    RngSeedManager::SetRun  (now % 1000);
 
     // ************************* PARÁMETROS DE SIMULACIÓN *************************
     // Paramatros de la topología
@@ -226,9 +70,8 @@ main(int argc, char* argv[])
     // ********************************** ARGUMENTOS ******************************
     int simTime_int = 35; 
     int slBearersActivationTime_int = 20;
-    uint16_t ueNum = 4;
+    uint16_t ueNum = 2;
     uint16_t IntNum = 10; //682
-    uint16_t simNum = 99;
     CommandLine cmd(__FILE__);
     cmd.AddValue("ueNum", "Number of UEs", ueNum);
     cmd.AddValue("IntNum", "Number of Interferers", IntNum);
@@ -245,7 +88,6 @@ main(int argc, char* argv[])
                  "Método de asignación de recursos: 0 totalmente aleatorio, 1 aleatorio con rsrp, 2 greedy, 3 proportional fair ",
                  resourceAllocationMethod);
     cmd.AddValue("mobility_file", "Mobility file path", mobility_file);
-    cmd.AddValue("SimNum", "Número de simulación", simNum);
     cmd.Parse(argc, argv);
 
     simTime = Seconds(simTime_int);
@@ -256,9 +98,6 @@ main(int argc, char* argv[])
     Time finalSimTime = simTime + finalSlBearersActivationTime;
     Time finalSlBearersActivationTime2 = finalSlBearersActivationTime + Seconds(0.5);
     std::cout << "Duración de la simulacion: " << finalSimTime.GetSeconds() << std::endl;
-
-    uint16_t seed = IntNum*238 + simNum*912;
-    RngSeedManager::SetSeed(static_cast<uint32_t>(seed));
 
     NS_ABORT_IF(centralFrequencyBandSl > 6e9);
 
@@ -572,7 +411,7 @@ main(int argc, char* argv[])
     ptrFactory->SetSlSelectionWindow(5);
     ptrFactory->SetSlFreqResourcePscch(10); // PSCCH RBs
     ptrFactory->SetSlSubchannelSize(25);
-    ptrFactory->SetSlMaxNumPerReserve(1);
+    ptrFactory->SetSlSubchannelSize(25);
     std::list<uint16_t> resourceReservePeriodList = {0, 100}; // ms
     ptrFactory->SetSlResourceReservePeriodList(resourceReservePeriodList);
     // Crear el pool
@@ -882,130 +721,10 @@ main(int argc, char* argv[])
 
     // *************************************************************************************
 
-
-    // ************************* CONFIGURACIÓN DE LA BASE DE DATOS *************************
-    // Conectar rastros de Tx y Rx
-    std::ostringstream path;
-    path << "/NodeList/" << ueNodesContainer.Get(1)->GetId()
-         << "/ApplicationList/0/$ns3::PacketSink/Rx";
-    Config::ConnectWithoutContext(path.str(), MakeCallback(&ReceivePacket));
-    path.str("");
-    path << "/NodeList/" << ueNodesContainer.Get(1)->GetId()
-         << "/ApplicationList/0/$ns3::PacketSink/Rx";
-    Config::ConnectWithoutContext(path.str(), MakeCallback(&ComputePir));
-    path.str("");
-
-    path << "/NodeList/" << ueNodesContainer.Get(ueNum)->GetId()
-         << "/ApplicationList/0/$ns3::OnOffApplication/Tx";
-    Config::ConnectWithoutContext(path.str(), MakeCallback(&TransmitPacket));
-    path.str("");
-
-    // Crear la base de datos
-    std::string exampleName = simTag + "-" + "v2x";
-    SQLiteOutput db(outputDir + exampleName + ".db");
-
-    // Conectar estadísticas solo para los primeros ueNum nodos (platooning)
-    UeMacPscchTxOutputStats pscchStats;
-    pscchStats.SetDb(&db, "pscchTxUeMac");
-    for (uint32_t i = 0; i < ueNum; ++i) {
-        std::ostringstream path;
-        path << "/NodeList/" << ueNodesContainer.Get(i)->GetId()
-             << "/DeviceList/*/$ns3::NrUeNetDevice/ComponentCarrierMapUe/*/NrUeMac/SlPscchScheduling";
-        Config::ConnectWithoutContext(path.str(), MakeBoundCallback(&NotifySlPscchScheduling, &pscchStats));
-    }
-
-    UeMacPsschTxOutputStats psschStats;
-    psschStats.SetDb(&db, "psschTxUeMac");
-    for (uint32_t i = 0; i < ueNum; ++i) {
-        std::ostringstream path;
-        path << "/NodeList/" << ueNodesContainer.Get(i)->GetId()
-             << "/DeviceList/*/$ns3::NrUeNetDevice/ComponentCarrierMapUe/*/NrUeMac/SlPsschScheduling";
-        Config::ConnectWithoutContext(path.str(), MakeBoundCallback(&NotifySlPsschScheduling, &psschStats));
-    }
-
-    UePhyPscchRxOutputStats pscchPhyStats;
-    pscchPhyStats.SetDb(&db, "pscchRxUePhy");
-    for (uint32_t i = 0; i < ueNum; ++i) {
-        std::ostringstream path;
-        path << "/NodeList/" << ueNodesContainer.Get(i)->GetId()
-             << "/DeviceList/*/$ns3::NrUeNetDevice/ComponentCarrierMapUe/*/NrUePhy/SpectrumPhy/RxPscchTraceUe";
-        Config::ConnectWithoutContext(path.str(), MakeBoundCallback(&NotifySlPscchRx, &pscchPhyStats));
-    }
-
-    UePhyPsschRxOutputStats psschPhyStats;
-    psschPhyStats.SetDb(&db, "psschRxUePhy");
-    for (uint32_t i = 0; i < ueNum; ++i) {
-        std::ostringstream path;
-        path << "/NodeList/" << ueNodesContainer.Get(i)->GetId()
-             << "/DeviceList/*/$ns3::NrUeNetDevice/ComponentCarrierMapUe/*/NrUePhy/SpectrumPhy/RxPsschTraceUe";
-        Config::ConnectWithoutContext(path.str(), MakeBoundCallback(&NotifySlPsschRx, &psschPhyStats));
-    }
-
-    UeToUePktTxRxOutputStats pktStats;
-    pktStats.SetDb(&db, "pktTxRx");
-
-
-    // Establecer traces de Tx y Rx
-    for (uint32_t ac = 0; ac < clientApps.GetN(); ac++)
-    {
-        Ipv4Address localAddrs = clientApps.Get(ac)
-                                        ->GetNode()
-                                        ->GetObject<Ipv4L3Protocol>()
-                                        ->GetAddress(1, 0)
-                                        .GetLocal();
-        std::cout << "Tx address: " << localAddrs << std::endl;
-        clientApps.Get(ac)->TraceConnect("TxWithSeqTsSize",
-            "tx",
-            MakeBoundCallback(&UePacketTraceDb,
-                            &pktStats,
-                            ueNodesContainer.Get(0),
-                            localAddrs));
-    }
-
-    // Establecer traces rx
-    for (uint32_t j = 0; j < ueNum; j++)
-    {
-        for (uint32_t ac = 0; ac < serverApps.GetN(); ac++)
-        {
-                Ipv4Address localAddrs = serverApps.Get(ac)
-                                                ->GetNode()
-                                                ->GetObject<Ipv4L3Protocol>()
-                                                ->GetAddress(1, 0)
-                                                .GetLocal();
-                std::cout << "Rx address: " << localAddrs << std::endl;
-                serverApps.Get(ac)->TraceConnect("RxWithSeqTsSize",
-                                                    "rx",
-                                                    MakeBoundCallback(&UePacketTraceDb,
-                                                                    &pktStats,
-                                                                    ueNodesContainer.Get(j),
-                                                                    localAddrs));
-        }
-    }
-    // *************************************************************************************
-
     // ****************************** INICIO DE LA SIMULACIÓN ******************************
     std::cout << "Starting simulation..." << std::endl;
     Simulator::Stop(finalSimTime);
     Simulator::Run();
-
-    std::cout << "Total Tx bits = " << txByteCounter * 8 << std::endl;
-    std::cout << "Total Tx paquetes = " << txPktCounter << std::endl;
-
-    std::cout << "Total Rx bits = " << rxByteCounter * 8 << std::endl;
-    std::cout << "Total Rx paquetes = " << rxPktCounter << std::endl;
-
-    std::cout << "Thput prom = "
-              << (rxByteCounter * 8) / (finalSimTime - Seconds(realAppStart)).GetSeconds() / 1000.0
-              << " kbps" << std::endl;
-
-    std::cout << "Average Packet Inter-Reception (PIR) " << pir.GetSeconds() / pirCounter << " sec"
-              << std::endl;
-
-    pktStats.EmptyCache();
-    pscchStats.EmptyCache();
-    psschStats.EmptyCache();
-    pscchPhyStats.EmptyCache();
-    psschPhyStats.EmptyCache();
 
     Simulator::Destroy();
     std::cout << "Simulation finished." << std::endl;

@@ -1,6 +1,6 @@
 import argparse
-import gymnasium as gym
 import numpy as np
+import os
 from collections import deque
 import random
 import torch
@@ -39,150 +39,144 @@ class ReplayMemory:
 class ResourceAllocation:
     learning_rate_a = 0.001
     discount_factor_g = 0.8
-    network_sync_rate = 10
-    replay_memory_size = 3000
-    mini_batch_size = 32
+    network_sync_rate = 100
+    replay_memory_size = 5000
+    mini_batch_size = 128
     loss_fn = nn.MSELoss()
 
-    def __init__(self, env):
+    def __init__(self, env, model_path=None):
         self.env = env
         self.optimizer = None
+        self.model_path = model_path
 
     def train(self, episodes):
-        # Determine sizes based on environment's spaces
-        num_states = 4#*30*5*5
+        # Determinación de dimensiones
+        state_max   = np.array([4, 30, 4, 4])
+        num_states  = 4  # ob_space.shape[0] en otro caso
         num_actions = 4*140*15
-        ob_space = self.env.observation_space
-        ac_space = self.env.action_space
-        print("Observation space: ", ob_space, ob_space.dtype)
-        print("Action space: ", ac_space, ac_space.dtype)
-        #num_states = ob_space.shape[0]
-        #num_actions = ac_space.n
 
-        # Network sizes
+        # Tamaños de las capas ocultas
         l1, l2, l3 = 512, 256, 128
 
-        # Initialize networks and memory
+        # Inicializar redes
         policy_dqn = DQN(num_states, l1, l2, l3, num_actions)
         target_dqn = DQN(num_states, l1, l2, l3, num_actions)
+
+        # Eliminada la carga de checkpoint para entrenar siempre desde cero
+        print("[INFO] Iniciando entrenamiento desde cero.")
+
+        # Sincronizar target con policy
         target_dqn.load_state_dict(policy_dqn.state_dict())
+
+        # Optimizador
         self.optimizer = torch.optim.Adam(policy_dqn.parameters(), lr=self.learning_rate_a)
         memory = ReplayMemory(self.replay_memory_size)
 
         epsilon = 1.0
         epsilon_history, rewards_per_episode = [], []
-        step_count = 0
+        step_count = step_count2 = 0
 
         for episode in range(episodes):
-            print(f"Episode {episode + 1}")
+            print(f"============= Episodio {episode + 1} =============")
             obs = self.env.reset()
-            state = torch.tensor(obs, dtype=torch.float32)
+            state = torch.tensor(np.array(obs)/state_max, dtype=torch.float32)
             total_reward = 0
             done = False
 
             while not done:
-                # Epsilon-greedy action
+                # Política ε-greedy
                 if random.random() < epsilon:
                     action = random.randint(0, num_actions - 1)
                 else:
                     with torch.no_grad():
-                        q_vals = policy_dqn(state)
-                        action = q_vals.argmax().item()
+                        action = policy_dqn(state).argmax().item()
 
-                # Step environment
-                next_obs, reward, done, info = env.step(action)
+                next_obs, reward, done, _ = self.env.step(action)
                 if next_obs is None:
-                    print("No next observation, ending step")
                     continue
-                next_state = torch.tensor(next_obs, dtype=torch.float32)
+
+                next_state = torch.tensor(np.array(next_obs)/state_max, dtype=torch.float32)
                 total_reward += reward
 
-                # Store transition
                 memory.append((state, action, next_state, reward, done))
                 state = next_state
                 step_count += 1
+                step_count2 += 1
 
-                # Learn
-                if len(memory) > self.mini_batch_size:
-                    batch = memory.sample(self.mini_batch_size)
-                    self.optimize(batch, policy_dqn, target_dqn)
 
-                # Sync target network
-                if step_count > self.network_sync_rate:
+                # Sincronización periódica
+                if step_count2 > self.network_sync_rate:
+                    step_count2 = 0
                     target_dqn.load_state_dict(policy_dqn.state_dict())
+                
+            # Aprendizaje
+            if len(memory) > self.mini_batch_size:
+                batch = memory.sample(self.mini_batch_size)
+                self.optimize(batch, policy_dqn, target_dqn)
 
-            # End of episode
-            rewards_per_episode.append(total_reward / step_count if step_count > 0 else 0)
-            epsilon = epsilon - 1 / episodes
+            # Fin de episodio
+            rewards_per_episode.append(total_reward / (step_count or 1))
+            epsilon = max(0.0, epsilon - 1/episodes)
             epsilon_history.append(epsilon)
             step_count = 0
 
-            # Guardado cada 1000 episodios (empezando desde episodio 1)
-            if (episode + 1) % 1000 == 0:
-                # Guardar red neuronal
-                model_name = f"ResourceAllocation{episode+1}.pt"
-                torch.save(policy_dqn.state_dict(), model_name)
-
-                # Guardar CSV
+            # Guardado periódico cada 100 episodios
+            if (episode + 1) % 100 == 0:
+                guardar = f"Resource_Allocation{episode+1}.pt"
+                torch.save(policy_dqn.state_dict(), guardar)
+                print(f"[INFO] Modelo guardado en «{guardar}»")
+                # Exportar CSV de métricas
                 csv_name = f"datos{episode+1}.csv"
-                with open(csv_name, mode='w', newline='') as file:
-                    writer = csv.writer(file)
-                    writer.writerow(["reward", "epsilon"])
-                    for r, e in zip(rewards_per_episode, epsilon_history):
-                        writer.writerow([r, e])
+                with open(csv_name, 'w', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(["reward","epsilon"])
+                    writer.writerows(zip(rewards_per_episode, epsilon_history))
 
-        # Close env
         self.env.close()
         return rewards_per_episode, epsilon_history
 
     def optimize(self, batch, policy_dqn, target_dqn):
         current_q, target_q = [], []
         for state, action, next_state, reward, done in batch:
-            # Compute target
+            # Cálculo de Q* objetivo
             if done:
-                target_val = torch.tensor([reward])
+                y = torch.tensor([reward])
             else:
                 with torch.no_grad():
-                    next_q = target_dqn(next_state).max()
-                    target_val = torch.tensor([reward]) + self.discount_factor_g * next_q
+                    y = torch.tensor([reward]) + self.discount_factor_g * target_dqn(next_state).max()
 
-            # Current Q
-            cur_q = policy_dqn(state)
-            current_q.append(cur_q)
-
-            # Build target Q vector
-            tq = policy_dqn(state).clone()
-            tq[action] = target_val
-            target_q.append(tq)
+            q_pred = policy_dqn(state)
+            current_q.append(q_pred)
+            y_full = q_pred.clone()
+            y_full[action] = y
+            target_q.append(y_full)
 
         loss = self.loss_fn(torch.stack(current_q), torch.stack(target_q))
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
 
-# Main: parse args, setup ns3-gym, train agent
+# Punto de entrada
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--start', type=int, default=1)
-    parser.add_argument('--iterations', type=int, default=10000)
+    parser.add_argument('--iterations', type=int, default=1000)
     args = parser.parse_args()
 
-    # ns3-gym parameters
+    # Configurar NS3-Gym
     port = 5555
     stepTime = 0.1
-    seed = 0
-    simTime = 40
-    simArgs = {"--simTime": simTime}
-    env = ns3env.Ns3Env(port=port, stepTime=stepTime, startSim=bool(args.start), simSeed=seed, simArgs=simArgs)
-    # Optionally: env = ns3env.Ns3Env()
+    env = ns3env.Ns3Env(port=port, stepTime=stepTime, startSim=bool(args.start),
+                        simSeed=0, simArgs={"--simTime": 40})
     env.reset()
+
+    # Entrenador
     agent = ResourceAllocation(env)
-    # Train for given number of iterations
     rewards, eps_history = agent.train(args.iterations)
 
-    # Optionally: plot results
+    # Visualización final
     import matplotlib.pyplot as plt
     plt.plot(rewards)
-    plt.xlabel('Episode')
-    plt.ylabel('Rewards')
+    plt.xlabel('Episodio')
+    plt.ylabel('Recompensa media')
     plt.show()
