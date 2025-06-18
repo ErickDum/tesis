@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<!-- generated on 2025-06-03 10:12:42.104661 by randomTrips.py v1_23_1+0328-c58cdcecd81
+<!-- generated on 2025-06-18 09:57:51.497218 by randomTrips.py v1_23_1+0328-c58cdcecd81
 <configuration>
     <net-file value="./sumo/urban/map_urban.net.xml"/>
     <route-file value="./sumo/urban/map_urban.rou.xml"/>
@@ -10,7 +10,7 @@
 </configuration>
 -->
 
-<!-- generated on 2025-06-03 10:12:42 by Eclipse SUMO duarouter Version v1_23_1+0328-c58cdcecd81
+<!-- generated on 2025-06-18 09:57:51 by Eclipse SUMO duarouter Version v1_23_1+0328-c58cdcecd81
 <duarouterConfiguration xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://sumo.dlr.de/xsd/duarouterConfiguration.xsd">
 
     <input>
