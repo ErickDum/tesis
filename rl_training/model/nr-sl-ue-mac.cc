@@ -443,6 +443,10 @@ NrSlUeMac::GetCandidateResourcesPrivate(const SfnSf& sfn,
     // step 4 as per TS 38.214 sec 8.1.4
     candidateSlots =
         txPool->GetNrSlCommOpportunities(absSlotIndex, bwpId, numerology, poolId, m_t1, t2);
+    uint32_t numSlots = candidateSlots.size();
+    //std::cout << "numSlots: " << numSlots << " sub: "<< report.m_subchannels << " lSubch: " << params.m_lSubch << std::endl;
+    uint32_t perSlot  = report.m_subchannels - params.m_lSubch + 1;  
+    uint32_t maxCandidates = numSlots * perSlot;
     report.m_initialCandidateSlotsSize = candidateSlots.size();
 
     if (candidateSlots.empty())
@@ -459,9 +463,11 @@ NrSlUeMac::GetCandidateResourcesPrivate(const SfnSf& sfn,
                                                         psfchPeriod,
                                                         minTimeGapPsfch,
                                                         params.m_lSubch,
-                                                        totalSubCh,
+                                                        report.m_subchannels,
                                                         candidateSlots);
     uint32_t mTotal = candidateResources.size(); // total number of candidate single-slot resources
+    //std::cout << "maximo teorico de candidatos: " << maxCandidates << " mTotal: " << mTotal << std::endl;
+
     report.m_initialCandidateResourcesSize = mTotal;
     if (!m_enableSensing)
     {

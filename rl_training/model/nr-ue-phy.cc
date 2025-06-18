@@ -39,8 +39,12 @@
 namespace ns3
 {
 
+
 const Time NR_DEFAULT_PMI_INTERVAL_WB{MilliSeconds(10)}; // Wideband PMI update interval
 const Time NR_DEFAULT_PMI_INTERVAL_SB{MilliSeconds(2)};  // Subband PMI update interval
+uint32_t txPktCounter = 0;
+uint32_t lastTxPktCounter = 0;
+
 
 NS_LOG_COMPONENT_DEFINE("NrUePhy");
 NS_OBJECT_ENSURE_REGISTERED(NrUePhy);
@@ -210,6 +214,10 @@ NrUePhy::GetTypeId()
             .AddTraceSource("PhyPsschReceived",
                             "Se dispara al recibir un PSSCH PDU",
                             MakeTraceSourceAccessor(&NrUePhy::m_phyPsschReceivedTrace),
+                            "ns3::TracedCallback::Uint32")
+            .AddTraceSource("PhyPsschTransmited",
+                            "Se dispara al enviar un PSSCH PDU",
+                            MakeTraceSourceAccessor(&NrUePhy::m_phyPsschTransmitedTrace),
                             "ns3::TracedCallback::Uint32");
     return tid;
 }
@@ -1150,6 +1158,7 @@ NrUePhy::SendDataChannels(const Ptr<PacketBurst>& pb,
 {
     if (pb->GetNPackets() > 0)
     {
+        txPktCounter += pb->GetNPackets();
         LteRadioBearerTag tag;
         if (!pb->GetPackets().front()->PeekPacketTag(tag))
         {
@@ -1164,6 +1173,7 @@ void
 NrUePhy::SendCtrlChannels(Time duration)
 {
     m_spectrumPhy->StartTxUlControlFrames(m_ctrlMsgs, duration);
+    
     m_ctrlMsgs.clear();
 }
 
@@ -1894,6 +1904,7 @@ Time
 NrUePhy::SlData(const NrSlVarTtiAllocInfo& varTtiInfo)
 {
     NS_LOG_FUNCTION(this);
+    
 
     Time varTtiDuration = GetSymbolPeriod() * varTtiInfo.symLength;
     Ptr<PacketBurst> pktBurst = PopPsschPacketBurst();
@@ -1936,6 +1947,9 @@ NrUePhy::SendNrSlDataChannels(const Ptr<PacketBurst>& pb,
                               const NrSlVarTtiAllocInfo& varTtiInfo)
 {
     NS_LOG_FUNCTION(this);
+    uint32_t nodeId = m_netDevice->GetNode()->GetId();
+    //std::cout << "Transmitido: " << nodeId << std::endl;
+    m_phyPsschTransmitedTrace(nodeId);
 
     std::vector<int> channelRbs;
     uint32_t lastRbInPlusOne = (varTtiInfo.rbStart + varTtiInfo.rbLength);
@@ -2100,7 +2114,7 @@ NrUePhy::PhyPscchPduReceived(const Ptr<Packet>& p, const SpectrumValue& psd)
     int rbPorSubcanal = 25;
     int rbParaPotencia = 10;
 
-    int numSubcanales = 10;
+    int numSubcanales = 11;
     //int BW = 15000*2*12;
 
     std::vector<double> powers; // Vector donde se guardarán las potencias
@@ -2274,6 +2288,7 @@ NrUePhy::PhyPsschPduReceived(const Ptr<PacketBurst>& pb, const SpectrumValue& ps
 {   
     
     uint32_t nodeId = m_netDevice->GetNode()->GetId();
+    //std::cout <<"Paquetes " << nodeId << std::endl;
     m_phyPsschReceivedTrace(nodeId);
 
     
@@ -2482,3 +2497,4 @@ NrUePhy::ReportUeSlRsrpMeasurements()
 }
 
 } // namespace ns3
+

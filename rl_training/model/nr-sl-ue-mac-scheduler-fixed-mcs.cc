@@ -41,6 +41,7 @@ NS_OBJECT_ENSURE_REGISTERED(NrSlUeMacSchedulerFixedMcs);
 std::vector<uint32_t> packetCounts(4, 0); // Inicializa con 4 elementos (índices 0 a 3) en 0
 std::vector<uint32_t> States(4, 0);
 std::vector<uint8_t> DoActions(4, 0);
+bool flag = true;
 
 TypeId
 NrSlUeMacSchedulerFixedMcs::GetTypeId(void)
@@ -76,10 +77,11 @@ NrSlUeMacSchedulerFixedMcs::GetTypeId(void)
     return tid;
 }
 
+
 Ptr<OpenGymSpace> 
 NrSlUeMacSchedulerFixedMcs::GetActSpace (void)
 {
-    uint32_t nodeNum = 8400;
+    uint32_t nodeNum = 25800;
 
     Ptr<OpenGymDiscreteSpace> space = CreateObject<OpenGymDiscreteSpace> (nodeNum);
     NS_LOG_UNCOND ("MyGetActionSpace: " << space);
@@ -109,12 +111,11 @@ NrSlUeMacSchedulerFixedMcs::GetGameOver ()
     stepCounter += 1;
     
     auto now = ns3::Simulator::Now();
-    //std::cout << "Tiempo de simulación: " << now.GetSeconds() << " s" << std::endl;
-    if (now >= ns3::Seconds(100))
+    if (now >= ns3::Seconds(78))
     { 
         isGameOver = true;
     }
-    NS_LOG_UNCOND ("MyGetGameOver: " << isGameOver);
+    //NS_LOG_UNCOND ("MyGetGameOver: " << isGameOver);
     //std::cout << "---5---" << std::endl;
     return isGameOver;
 }
@@ -132,28 +133,45 @@ NrSlUeMacSchedulerFixedMcs::GetObservation (void)
         box->AddValue(States[i]);
     }
 
-    NS_LOG_UNCOND ("MyGetObservation: " << box);
+    //NS_LOG_UNCOND ("MyGetObservation: " << box);
     //std::cout << "---3---" << std::endl;
     //std::cout << "Observation: ";
     //for (uint32_t i = 0; i < nodeNum; i++) {
     //    std::cout << box->GetValue(i) << " ";
+ 
     //}
     //std::cout << std::endl;
 
     return box;
 }
 
-float 
+float
 NrSlUeMacSchedulerFixedMcs::GetReward (void)
-{ 
-    uint8_t RC = DoActions[1];
-    uint32_t N_rx = States[0];
+{
+    // Action- and state-derived quantities
+    uint8_t RC     = DoActions[1];      // Number of resources used
+    uint32_t N_rx  = States[0];         // Number of successfully received packets
+    uint32_t N     = States[1];         // Total number of packets (or capacity)
+    double  RC_max = static_cast<double>(GetSlMaxTxTransNumPssch()); // Maximum possible RC
+
+    // Hyperparameters for the reward function
+    const double alpha = 0.7;  // weight for the RC term
+    const double beta  = 0.9;  // weight for the N_rx term
+    const double gamma = 1.0;  // weight for the penalty term
+
+    // Normalize
+    double rc_norm = (RC_max > 0) ? static_cast<double>(RC) / RC_max : 0.0;
+    double nrx_norm = (N > 0) ? static_cast<double>(N_rx) / static_cast<double>(N) : 0.0;
+
+    // R(s,a) = α·(RC/RC_max) + β·(N_rx/N) – γ·(1 – RC/RC_max)·(1 – N_rx/N)
     double reward = 0.0;
 
-    if (N_rx > 1) {
-        reward = (static_cast<double>(N_rx) / 3.0) * (static_cast<double>(RC) / 15.0);
+    if (DoActions[3] + DoActions[2] > States[1]) {
+        reward = -5.0;
     } else {
-        reward = - (2.0 - static_cast<double>(N_rx)) * (static_cast<double>(RC) / 30.0);
+        reward = alpha * rc_norm
+                + beta  * nrx_norm
+                - gamma * (1.0 - rc_norm) * (1.0 - nrx_norm);
     }
 
     return static_cast<float>(reward);
@@ -170,33 +188,33 @@ NrSlUeMacSchedulerFixedMcs::ExecuteAction (Ptr<OpenGymDataContainer> actionConta
     m_lastAction.clear ();
     m_lastAction.push_back (discrete->GetValue ());
     std::vector<uint8_t> Actions(4, 0);
-    Actions[0] = (uint8_t)((m_lastAction[0]/2100)+1);
-    Actions[1] = (uint8_t)((m_lastAction[0]%2100)/140)+1;
+    Actions[0] = (uint8_t)((m_lastAction[0]/6450)+1);
+    Actions[1] = (uint8_t)((m_lastAction[0]%6450)/430)+1;
 
-    if(m_lastAction[0]%140 <30)
+    if(m_lastAction[0]%430 <88)
     {
         Actions[2] = 1;
-        Actions[3] = uint8_t(m_lastAction[0]%140)+1;
+        Actions[3] = uint8_t(m_lastAction[0]%430)+1;
     }
-    else if (m_lastAction[0]%140 <59)
+    else if (m_lastAction[0]%430 <175)
     {
         Actions[2] = 2;
-        Actions[3] = uint8_t(m_lastAction[0]%140)-29;
+        Actions[3] = uint8_t(m_lastAction[0]%430)-87;
     }
-    else if (m_lastAction[0]%140 <87)
+    else if (m_lastAction[0]%430 <261)
     {
         Actions[2] = 3;
-        Actions[3] = uint8_t(m_lastAction[0]%140)-58;
+        Actions[3] = uint8_t(m_lastAction[0]%430)-174;
     }
-    else if (m_lastAction[0]%140 <114)
+    else if (m_lastAction[0]%430 <346)
     {
         Actions[2] = 4;
-        Actions[3] = uint8_t(m_lastAction[0]%140)-86;
+        Actions[3] = uint8_t(m_lastAction[0]%430)-260;
     }
-    else if (m_lastAction[0]%140 <140)
+    else if (m_lastAction[0]%430 <430)
     {
         Actions[2] = 5;
-        Actions[3] = uint8_t(m_lastAction[0]%140)-113;
+        Actions[3] = uint8_t(m_lastAction[0]%430)-345;
     }
     
 
@@ -321,6 +339,16 @@ void MyPhyPsschRxCallback(uint32_t nodeId)
     {
         // Incrementa el contador correspondiente al nodo
         packetCounts[nodeId]++;
+        //std::cout << "Aumenta " << nodeId << "  " << packetCounts[nodeId] << std::endl;
+    }
+}
+
+void MyPhyPsschTxCallback(uint32_t nodeId)
+{
+    if (nodeId == 0)
+    {
+        // Incrementa el contador correspondiente al nodo
+        packetCounts[nodeId]++;
     }
 }
 
@@ -344,6 +372,7 @@ void ConnectPhyPsschRxCallbackToUePhys()
                 if (phy)
                 {
                     phy->TraceConnectWithoutContext("PhyPsschReceived", MakeCallback(&MyPhyPsschRxCallback));
+                    phy->TraceConnectWithoutContext("PhyPsschTransmited", MakeCallback(&MyPhyPsschTxCallback));
                 }
             }
         }
@@ -1933,6 +1962,15 @@ NrSlUeMacSchedulerFixedMcs::DoNrSlAllocation(
         else if (method == 2)
         {
             selectedTxOpps = SelectResourcesBasedOnPower(candResources);
+            /*
+            std::cout << "Candidatos: " << candResources.size() << std::endl;
+            for (const auto & cand : candResources) {
+                std::cout << "Candidate SFN: " << cand.sfn.Normalize()
+                        //<< ", Subchannel Start: " << static_cast<unsigned>(cand.slSubchannelStart)
+                        //<< ", Subchannel Length: " << static_cast<unsigned>(cand.slSubchannelLength)
+                        << ", Slot Power: " << static_cast<double>(cand.slPower)
+                        << ", Slot Sinr: " << static_cast<double>(cand.slSinr)
+                        << std::endl;}//*/
         }
         else if (method == 3)
         {
@@ -1958,8 +1996,12 @@ NrSlUeMacSchedulerFixedMcs::DoNrSlAllocation(
             //En esta parte se selecciona el RC, no se utiliza para el filtrado pero si se utiliza para las transmisiones
             //m_cResel = 150;
             //m_reselCounter = 15;
-            ConnectPhyPsschRxCallbackToUePhys();
-            double suma = 0.0;
+            if(flag)
+            {
+                ConnectPhyPsschRxCallbackToUePhys();
+                flag = false;
+            }            
+                        double suma = 0.0;
             for (const auto& cand : candResources) {
                 suma += cand.slSinr;
             }
@@ -2000,32 +2042,42 @@ NrSlUeMacSchedulerFixedMcs::DoNrSlAllocation(
                 States[3] = 4;
             }
 
+
+
             // Paso 1: encontrar el valor máximo
-            uint32_t maxValor = *std::max_element(packetCounts.begin(), packetCounts.end());
-            int nrx = 0;
+            uint32_t maxValor = packetCounts[0];
+            int nrx = -1;
             // Verificar que no sea cero para evitar división por cero
             if (maxValor > 0)
             {
                 for (const auto& valor : packetCounts) 
                 {
+                    //std::cout << "iterando" << std::endl;
                     double proporcion = static_cast<double>(valor) / maxValor;
-                    if (proporcion >= 0.9) {
+                    if (proporcion >= 0.5) 
+                    {
                         nrx++;
                     }
                 }
             }
+            else
+            {
+                nrx = 0;
+            }
         
             States[0] = nrx;
             States[1] = candResources.size();
+            //std::cout << "Recibidos: " <<  packetCounts[0] << " " << packetCounts[1] << " " << packetCounts[2] << " " << packetCounts[3] << std::endl;
+            //std::cout << "Nrx: " << nrx << std::endl;
+            //std::cout << "Total candidatos" << candResources.size() << std::endl;
             // std::cout << "Estados: " << States[0] << ", " << States[1] << ", " << States[2] << ", " << States[3] << std::endl;
             packetCounts.assign(4, 0); // Reinicia el vector con 4 elementos en 0
 
             // --- NS3 GYM
             // 1) Notifica a Python el estado actual
-            //std::cout << "AAAAAAaaAaAaAaaaAAaA" << std::endl;
             m_openGym->NotifyCurrentState ();
-            //std::cout << "dddDddDDddDDddDDdddD" << std::endl;
             selectedTxOpps = SelectResourcesMDP(candResources,DoActions);
+            //selectedTxOpps = SelectResourcesProportionalFair(candResources);
 
             
             
@@ -2254,7 +2306,6 @@ NrSlUeMacSchedulerFixedMcs::SelectResourcesProportionalFair(std::list<SlResource
     return newTxOpps;
 }
 
-// Rotar / voltear un cuadrante de tamaño ‘n’
 static void
 RotHilbert (int n, int &x, int &y, int rx, int ry)
 {
@@ -2287,13 +2338,11 @@ Xy2D (int n, int x, int y)
     return d;
 }
 
-
 std::list<SlResourceInfo>
 NrSlUeMacSchedulerFixedMcs::SelectResourcesMDP(std::list<SlResourceInfo> txOpps,
                                                std::vector<uint8_t> Actions)
 {
     NS_LOG_FUNCTION(this << txOpps.size());
-
     uint8_t totalTx = GetSlMaxTxTransNumPssch();
     std::list<SlResourceInfo> newTxOpps;
 
@@ -2356,39 +2405,36 @@ NrSlUeMacSchedulerFixedMcs::SelectResourcesMDP(std::list<SlResourceInfo> txOpps,
 
     m_reselCounter = Actions[1];
     m_cResel = m_reselCounter * 10;
-
     std::vector<SlResourceInfo> txOppsVec(txOpps.begin(), txOpps.end());
-    size_t totalRecursos = txOppsVec.size();
-    size_t start = Actions[3];
-    size_t count = Actions[2];
+    size_t totalRecursos = txOppsVec.size();    // N
+    size_t start         = Actions[3];          // índice de inicio
+    size_t count         = Actions[2];          // número deseado de recursos
 
-    if (totalTx >= totalRecursos)
+    // ----- BLOQUE NUEVO: selección con wrap-around -----
+    // Número efectivo de recursos a seleccionar: M = min(count, totalTx)
+    if (count >= totalRecursos)
     {
         newTxOpps.assign(txOpps.begin(), txOpps.end());
     }
     else
     {
-        if (start + count > totalRecursos)
+        size_t maxSelect = std::min<size_t>(count, totalTx);
+        for (size_t i = 0; i < maxSelect; ++i)
         {
-            if (count > totalRecursos)
-            {
-                start = 0;
-                count = totalRecursos;
-            }
-            else
-            {
-                start = totalRecursos - count;
-            }
-        }
-        for (size_t i = 0; i < count; ++i)
-        {
-            newTxOpps.push_back(txOppsVec[start + i]);
+            // Índice con módulo: I_i = (start + i) mod N
+            size_t idx = (start + i) % totalRecursos;
+            newTxOpps.push_back(txOppsVec[idx]);
         }
     }
 
+    
+    // -----------------------------------------------------
+
+    // Ordenamos la selección final y verificamos que no supere totalTx
     newTxOpps.sort();
     NS_ASSERT_MSG(newTxOpps.size() <= totalTx,
                   "Number of selected slots exceeded total number of TX");
+
     return newTxOpps;
 }
 
@@ -2570,3 +2616,4 @@ NrSlUeMacSchedulerFixedMcs::GetMacHarq(void) const
 }
 
 } // namespace ns3
+

@@ -78,6 +78,7 @@ class NrUePhy : public NrPhy
 
   public:
     TracedCallback<uint32_t> m_phyPsschReceivedTrace;
+    TracedCallback<uint32_t> m_phyPsschTransmitedTrace;
     /**
      * \brief Get the object TypeId
      * \return the object type id
@@ -1202,3 +1203,4 @@ class NrUePhy : public NrPhy
 } // namespace ns3
 
 #endif /* NR_UE_PHY_H */
+

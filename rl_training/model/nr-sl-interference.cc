@@ -215,6 +215,7 @@ NrSlInterference::ConditionallyEvaluateChunk()
 
             SpectrumValue sinr_est = interf;
             SpectrumValue sinr = (*(m_rxSignal[index])) / interf;
+            // std::cout << "signal: " << *m_rxSignal[index] << std::endl;
 
             Time duration = Now() - m_lastChangeTime;
             for (std::list<Ptr<NrSlChunkProcessor>>::const_iterator it =
