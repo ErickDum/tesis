@@ -34,21 +34,6 @@ La validación se realizó en un escenario vehicular realista (pelotón) en el c
 * SUMO (Simulation of Urban Mobility)
 * Python 3.8+ con librerías: `tensorflow` / `pytorch` (según implementación), `numpy`, `pandas`, `matplotlib`
 
-## Instalación
-
-1. Clonar el repositorio:
-
-   ```bash
-   git clone https://github.com/usuario/5g-sidelink-resource-allocation.git
-   cd 5g-sidelink-resource-allocation
-   ```
-2. Instalar dependencias Python:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-3. Asegurarse de que NS-3 y SUMO estén accesibles desde la línea de comandos.
-
 
 ## Resultados
 
