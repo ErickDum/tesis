@@ -22,10 +22,10 @@ La validación se realizó en un escenario vehicular realista (pelotón) en el c
 │       └── Scripts Python y Bash para entrenar la red neuronal.
 │
 └── standard_simulations/
-    ├── ns3-modified/
-    │   └── Código NS-3 para simulaciones del estándar y métodos heurísticos (Greedy, Proportional Fair).
-    └── simulation_scripts/
-        └── Scripts de ejecución de simulaciones y recopilación de resultados.
+│   ├── ns3-modified/
+│   │   └── Código NS-3 para simulaciones del estándar y métodos heurísticos (Greedy, Proportional Fair).
+│   └── simulation_scripts/
+│       └── Scripts de ejecución de simulaciones y recopilación de resultados.
 └── v2x.cc
     └── Script de simulación base 
 ```
