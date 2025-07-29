@@ -26,6 +26,8 @@ La validación se realizó en un escenario vehicular realista (pelotón) en el c
     │   └── Código NS-3 para simulaciones del estándar y métodos heurísticos (Greedy, Proportional Fair).
     └── simulation_scripts/
         └── Scripts de ejecución de simulaciones y recopilación de resultados.
+└── v2x.cc
+    └── Script de simulación base 
 ```
 
 ## Requisitos Previos
