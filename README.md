@@ -1,4 +1,4 @@
-## **Proyecto:** Mejora de la Selección de Recursos para Comunicaciones Sidelink 5G
+##  Diseño y evaluación de un sistema de comunicación Dispositivo a Dispositivo (D2D) basado en redes cognitivas para entornos más allá de 5G (Beyond 5G (B5G))
 
 ## Descripción
 
