@@ -41,7 +41,7 @@ La validación se realizó en un escenario vehicular realista (pelotón) en el c
 
 * **Filtrado por detector de energía:** mejora consistente en todas las métricas vs. estándar.
 * **Métodos heurísticos:** pequeñas ganancias frente al esquema del estándar.
-* **DQL (RL):** hasta +40% en throughput, -80% en retraso, +30% en BLER y +16% en PRR en alta densidad vehicular.
+* **DQL (RL):** hasta +40% en throughput, -80% en retraso, -30% en BLER y +16% en PRR en alta densidad vehicular.
 
 ## Contribuciones
 
